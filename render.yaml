@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: jarvis-nexus-global
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'
+    healthCheckPath: /api/health
+    envVars:
+      - key: JARVIS_TOKEN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini
+      - key: JARVIS_DB
+        value: /var/data/jarvis.db
+    disk:
+      name: jarvis-data
+      mountPath: /var/data
+      sizeGB: 1

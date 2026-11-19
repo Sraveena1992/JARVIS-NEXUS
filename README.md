@@ -1,55 +1,33 @@
-# JARVIS NEXUS — Voice-first AI assistant
+# JARVIS NEXUS GLOBAL v1 — Render private beta
 
-A cyberpunk-styled, local-first Windows assistant with a browser dashboard, authenticated FastAPI endpoints, Hindi/English voice input (browser-dependent), local Ollama chat, safe allowlisted desktop launches, tasks, reminders and YouTube search/player integration.
+Original v4.5 holographic interface retained; Anna app remains a **separate** release. This package is an independent FastAPI web application.
 
-![JARVIS NEXUS interface](reference-hero.webp)
-
-## Status and limitations
-
-**Prototype, not a hosted Anna AI app or a native mobile assistant.** The current backend is designed to run on Windows loopback (`127.0.0.1`). It must **not** be publicly deployed as-is. The mobile layout is web responsive, but mobile OS controls, background voice listening, contacts and remote Windows execution are not implemented. Browser speech recognition may require internet and permissions. YouTube autoplay may be blocked.
-
-## Quick start — Windows PowerShell
-
-```powershell
-cd "C:\path\to\JARVIS-NEXUS"
-py -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-$env:JARVIS_TOKEN = [guid]::NewGuid().ToString('N')
-$env:JARVIS_AI_PROVIDER = 'ollama'
-$env:OLLAMA_MODEL = 'qwen2.5:1.5b'
-Set-Clipboard -Value $env:JARVIS_TOKEN
-.\.venv\Scripts\python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000
-```
-
-Open `http://127.0.0.1:8000`, click **Set access token**, paste with **Ctrl+V**. Do not copy other text between copying the token and pasting it. For local AI, install Ollama and pull `qwen2.5:1.5b` separately.
-
-## Test
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install pytest httpx
-.\.venv\Scripts\python.exe -m pytest -q
-```
-
-## Architecture
-
-- `app.py` — FastAPI backend, token auth, SQLite tasks/history, allowlisted Windows commands, Ollama and video lookup.
-- `index.html` — responsive dashboard, browser voice, safe browser navigation.
-- `test_app.py` — backend unit tests; mocked Ollama and video metadata are **not live integrations**.
-- `MOBILE-ARCHITECTURE.md` — proposed native mobile/cloud roadmap, not shipped features.
-- `ANNA-REVIEW-CHECKLIST.md` — Anna AI OS publication blockers and listing draft.
+## Deployment to Render
+1. Create a **private GitHub repository** and upload these files at its root. Never upload `.env`, `.db`, tokens, or local workspaces.
+2. Render Dashboard → **New → Blueprint** → connect the repository and select `render.yaml`.
+3. Choose a **paid instance supporting persistent disks** (starter in the provided blueprint; verify current Render plan availability/pricing). Do not use an ephemeral filesystem for persistent tasks.
+4. In Render environment settings, set `JARVIS_TOKEN` to a cryptographically random string of at least 32 characters and `OPENAI_API_KEY` to your API key. Never put secrets in GitHub or frontend code.
+5. Deploy and check `/api/health`. Visit the site and click **Set access token**, paste the private token, then try `calculate 2+2`, `add task Test JARVIS`, and an AI question.
+6. **Do not distribute the access token publicly.** This is a single-admin private beta, not multi-user SaaS. Public sharing of the website URL is safe only as a locked demo; authenticated features require a private token.
 
 ## Security boundaries
+- No arbitrary file read/write, desktop app launch, shell access, or YouTube server-side lookup in the cloud build.
+- No public sign-up, per-user accounts, email verification, billing, or tenant isolation yet. **Do not issue the shared admin token to worldwide users.**
+- Chat and tasks use one SQLite database and are **not multi-tenant**. The persistent disk is single-instance oriented. Backups and retention policy must be established before production use.
+- Rate limiting is process-local, not distributed. Add reverse-proxy rate limits and per-user auth before public access.
+- AI calls require a valid server-side OpenAI API key and incur usage costs. Health reports configuration, not provider uptime.
+- Browser voice recognition requires browser support and microphone permissions. Voice transcription may use browser-vendor services.
+- Reminders are polled while the page is open, not push notifications.
+- PWA installation depends on browser/device; no service worker/offline mode in v1.
+- Mobile responsive CSS included, but device testing is required. Android Play Store build not included.
 
-Bind only to `127.0.0.1`. Never expose this backend, its token, SQLite database, local workspace, or Ollama port to the public internet. Keep secrets out of Git. Desktop app launches are allowlisted and require confirmation. For cloud/Anna publishing, create a separate sandboxed, authenticated, HTTPS-hosted version without direct desktop control.
+## Local smoke test
+```
+python -m pip install -r requirements.txt
+# Windows PowerShell:
+$env:JARVIS_TOKEN = [guid]::NewGuid().ToString('N') + [guid]::NewGuid().ToString('N')
+python -m uvicorn app:app --host 127.0.0.1 --port 8000
+```
 
-## Roadmap
-
-- [x] Local FastAPI dashboard and auth
-- [x] Browser voice input and safe browser actions
-- [x] Deterministic local date/time shortcuts
-- [ ] Measured voice latency and browser-device regression testing
-- [ ] Production-grade multiuser cloud gateway and permissions
-- [ ] Native Android/iOS integrations
-- [ ] Anna Executa, UI Runtime packaging and review submission
-
-License: not selected. Add a LICENSE file only after choosing licensing terms.
+## Rollout gate
+Before public launch: implement individual accounts and sessions, CSRF protections, data isolation, distributed rate limiting, moderation/abuse protection, provider spending caps, privacy policy and terms, logging without sensitive prompts, backup/restore and security review.

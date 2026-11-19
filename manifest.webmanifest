@@ -1,7 +1,7 @@
 {
-  "name": "JARVIS-AI NEXUS",
+  "name": "JARVIS NEXUS GLOBAL",
   "short_name": "JARVIS",
-  "description": "Local-first AI command center. Mobile web preview; phone integrations require native app.",
+  "description": "JARVIS NEXUS Global \u2014 secure private beta AI command center",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -18,5 +18,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "id": "/"
 }
