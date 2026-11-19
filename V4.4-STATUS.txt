@@ -1,0 +1,1 @@
+UI update only. Responsive layout and decorative animated waveform. Token authentication still required. Mobile Windows app launching not supported. Anna publishing/security review not complete. Hero source 1080x380 limits fidelity.

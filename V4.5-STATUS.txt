@@ -1,0 +1,1 @@
+Visual-only patch: image bounded at 225px, native-width cap, larger logo, animated decorative waveform. Authentication and AI functionality not independently verified.
