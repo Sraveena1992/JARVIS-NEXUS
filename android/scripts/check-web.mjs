@@ -1,0 +1,12 @@
+import { readFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
+const html=readFileSync(new URL('../../anna-app/index.html',import.meta.url),'utf8');
+const config=JSON.parse(readFileSync(new URL('../capacitor.config.json',import.meta.url),'utf8'));
+assert.match(html,/<meta name="viewport"/,'viewport meta tag');
+assert.match(html,/@media\(max-width:460px\)/,'small-screen breakpoint');
+assert.match(html,/textContent=task.title/,'task titles inserted as text');
+assert.doesNotMatch(html,/innerHTML\s*=/,'avoid HTML injection sinks');
+assert.doesNotMatch(html,/JARVIS_TOKEN|OPENAI_API_KEY|sk-[a-zA-Z0-9]{12,}/,'no obvious embedded secrets');
+assert.equal(config.android.allowMixedContent,false);
+assert.equal(config.server.url,undefined,'must not load remote dev URL');
+console.log('7 static mobile release checks passed (not a browser/device test)');
