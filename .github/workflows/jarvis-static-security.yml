@@ -1,0 +1,39 @@
+name: JARVIS static security and packaging checks
+on:
+  push:
+    branches: [main, 'feat/**']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile Python
+        run: python -m compileall -q app.py
+      - name: Validate Android packaging JSON
+        run: python -m json.tool android/package.json > /dev/null && python -m json.tool android/capacitor.config.json > /dev/null
+      - name: Verify mobile-web source is present
+        run: test -s anna-app/index.html && test -s anna-app/JARVIS-EXECUTA.md
+      - name: Check for unsafe remote Android server setting
+        run: |
+          python - <<'PY'
+          import json
+          config=json.load(open('android/capacitor.config.json'))
+          assert 'url' not in config.get('server',{}), 'Do not use a remote dev server in release'
+          assert config.get('android',{}).get('allowMixedContent') is False
+          print('Android packaging config checks passed')
+          PY
+      - name: Build offline Android web assets
+        run: cd android && node scripts/copy-web.mjs && test -s www/index.html
+      - name: Python dependency audit
+        run: |
+          python -m pip install pip-audit
+          pip-audit -r requirements.txt
