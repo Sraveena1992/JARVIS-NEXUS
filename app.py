@@ -1,4 +1,4 @@
-"""JARVIS NEXUS Global: Fast Voice, Polished Punjabi, Cloud & Google Workspace Ready."""
+"""JARVIS NEXUS Global: Fast Voice, Polished Punjabi, Detailed Docs, Cloud & Google Workspace Ready."""
 import ast
 import asyncio
 import hmac
@@ -31,8 +31,6 @@ TOKEN = os.environ.get("JARVIS_TOKEN", "")
 app = FastAPI(title="JARVIS NEXUS GLOBAL", docs_url=None, redoc_url=None, openapi_url=None)
 _hits = defaultdict(deque)
 _hit_lock = threading.Lock()
-_voice_cache = {"expires": 0.0, "punjabi_voice": None}
-_voice_lock = asyncio.Lock()
 _oauth_states = {}
 
 
@@ -112,8 +110,8 @@ async def secure(request: Request, call_next):
     response.headers["Permissions-Policy"] = "camera=(), geolocation=(), payment=()"
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' data:; connect-src 'self'; font-src 'self' data:; object-src 'none'; "
-        "base-uri 'self'; frame-ancestors 'none'"
+        "img-src 'self' data:; media-src 'self' blob: data:; connect-src 'self'; font-src 'self' data:; "
+        "object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
     )
     if request.url.path == "/" or request.url.path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-store"
@@ -196,17 +194,142 @@ def resolve_workspace_file(rel_path: str) -> Path:
     return target
 
 
+GURMUKHI_PHRASE_FIXES = {
+    "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ": "सत श्री अकाल",
+    "ਵਾਹਿਗੁਰੂ ਜੀ ਕਾ ਖਾਲਸਾ ਵਾਹਿਗੁਰੂ ਜੀ ਕੀ ਫਤਿਹ": "वाहेगुरु जी का खालसा वाहेगुरु जी की फतेह",
+    "ਤੁਹਾਡੀ": "तुहाडी",
+    "ਮਦਦ": "मदद",
+    "ਕਰ ਸਕਦੀ ਹਾਂ": "कर सकदी हां",
+    "ਕਰਾਂਗੀ": "करांगी",
+    "ਸਮਝ ਗਈ": "समझ गई",
+    "ਕੋਈ ਗੱਲ ਨਹੀਂ": "कोई गल नहीं",
+    "ਬਿਲਕੁਲ": "बिलकुल",
+    "ਦੱਸੋ": "दस्सो",
+    "ਕਿੱਦਾਂ": "किद्दां",
+    "ਤੁਸੀਂ": "तुसीं",
+    "ਮੈਂ": "मैं",
+    "ਹਾਂਜੀ": "हांजी",
+    "ਧੰਨਵਾਦ": "धन्यवाद",
+    "ਜਦੋਂ": "जदों",
+    "ਲੋੜ": "लोड़",
+    "ਬੇਝਿਜਕ": "बेझिझक",
+    "ਹਮੇਸ਼ਾ": "हमेशा",
+    "ਹਾਜ਼ਰ": "हाज़िर",
+    "ਮੌਸਮ": "मौसम",
+    "ਚੰਗਾ": "चंगा",
+    "ਸੋਹਣਾ": "सोहणा",
+    "ਵਧੀਆ": "वधीया",
+    "ਅੱਜ": "अज्ज",
+    "ਕੱਲ੍ਹ": "कल्ल",
+    "ਸਵੇਰ": "सवेर",
+    "ਸ਼ਾਮ": "शाम",
+    "ਰਾਤ": "रात",
+    "ਪੰਜਾਬੀ": "पंजाबी",
+    "ਗੱਲਬਾਤ": "गलबात",
+}
+
+GURMUKHI_CONSONANTS = {
+    "ੳ": "उ", "ਅ": "अ", "ੲ": "इ", "ਸ": "स", "ਹ": "ह",
+    "ਕ": "क", "ਖ": "ख", "ਗ": "ग", "ਘ": "घ", "ਙ": "ङ",
+    "ਚ": "च", "ਛ": "छ", "ਜ": "ज", "ਝ": "झ", "ਞ": "ञ",
+    "ਟ": "ट", "ਠ": "ठ", "ਡ": "ड", "ਢ": "ढ", "ਣ": "ण",
+    "ਤ": "त", "ਥ": "थ", "ਦ": "द", "ਧ": "ध", "ਨ": "न",
+    "ਪ": "प", "ਫ": "फ", "ਬ": "ब", "ਭ": "भ", "ਮ": "म",
+    "ਯ": "य", "ਰ": "र", "ਲ": "ल", "ਵ": "व", "ੜ": "ड़",
+    "ਸ਼": "श", "ਖ਼": "ख़", "ਗ਼": "ग़", "ਜ਼": "ज़", "ਫ਼": "फ़", "ਲ਼": "ल",
+}
+
+GURMUKHI_MATRAS = {
+    "ਾ": "ा", "ਿ": "ि", "ੀ": "ी", "ੁ": "ु", "ੂ": "ू",
+    "ੇ": "े", "ੈ": "ै", "ੋ": "ो", "ੌ": "ौ",
+}
+
+
+def normalize_punjabi_speech(text: str) -> str:
+    s = str(text or "").strip()
+    if not s:
+        return s
+    for pa_phrase, hi_phrase in GURMUKHI_PHRASE_FIXES.items():
+        s = s.replace(pa_phrase, hi_phrase)
+    if not re.search(r"[\u0A00-\u0A7F]", s):
+        return re.sub(r"\s+", " ", s).strip()
+
+    out = []
+    i = 0
+    n = len(s)
+    while i < n:
+        ch = s[i]
+        pair = s[i:i + 2]
+        if pair in GURMUKHI_CONSONANTS:
+            base = GURMUKHI_CONSONANTS[pair]
+            i += 2
+        elif ch in GURMUKHI_CONSONANTS:
+            base = GURMUKHI_CONSONANTS[ch]
+            i += 1
+        elif ch in GURMUKHI_MATRAS:
+            out.append(GURMUKHI_MATRAS[ch])
+            i += 1
+            continue
+        elif ch in ("ਂ", "ੰ"):
+            out.append("ं")
+            i += 1
+            continue
+        elif ch in ("ੱ", "਼", "੍"):
+            i += 1
+            continue
+        elif "\u0A66" <= ch <= "\u0A6F":
+            out.append(chr(ord("०") + (ord(ch) - ord("\u0A66"))))
+            i += 1
+            continue
+        elif ch in ("।", "॥"):
+            out.append("।")
+            i += 1
+            continue
+        else:
+            out.append(ch)
+            i += 1
+            continue
+
+        while i < n and s[i] in ("਼", "ੱ"):
+            i += 1
+
+        if i < n and s[i] == "੍":
+            out.append(base + "्")
+            i += 1
+            continue
+
+        if i < n and s[i] in GURMUKHI_MATRAS:
+            matra = GURMUKHI_MATRAS[s[i]]
+            i += 1
+            nasal = ""
+            if i < n and s[i] in ("ਂ", "ੰ"):
+                nasal = "ं"
+                i += 1
+            out.append(base + matra + nasal)
+        else:
+            nasal = ""
+            if i < n and s[i] in ("ਂ", "ੰ"):
+                nasal = "ं"
+                i += 1
+            out.append(base + nasal)
+
+    joined = "".join(out)
+    joined = re.sub(r"\s+([।?!,.:;])", r"\1", joined)
+    return re.sub(r"\s+", " ", joined).strip()
+
+
 SYSTEM = (
     "You are JARVIS NEXUS, a natural, warm, fast and concise conversational assistant. "
     "Speak like a helpful human assistant in everyday bolchal (conversational speech), avoiding stiff or overly literary words. "
     "Strictly obey the requested [CONVERSATION LANGUAGE] and script. Never switch languages or scripts unexpectedly. "
     "Avoid introductions such as Hello I am JARVIS unless asked. Do not use markdown headings, "
-    "asterisks, bullets, or tables in voice-style answers. Prefer natural short spoken sentences. "
+    "asterisks, bullets, or tables in voice-style answers. Never output tags or brackets like [[SPEAK:...]]. "
+    "Always finish your sentence cleanly without cutting off mid-thought. "
     "Never claim you are placing, connecting, or dialing a real phone call unless an actual calling action succeeded; "
     "if asked to call someone, clearly say direct calling is not supported here and offer to look up their contact instead. "
     "Use a consistent warm feminine JARVIS persona: in Hindi say kar sakti hoon, karungi, samajh gayi; "
-    "in Punjabi say ਕਰ ਸਕਦੀ ਹਾਂ / kar sakdi haan, ਕਰਾਂਗੀ / karangi, ਸਮਝ ਗਈ / samajh gayi. "
-    "Keep replies crisp, natural, and fast."
+    "in Punjabi say ਕਰ ਸਕਦੀ ਹਾਂ, ਕਰਾਂਗੀ, ਸਮਝ ਗਈ. "
+    "Keep replies clear, complete, natural, and fast."
 )
 
 
@@ -218,19 +341,68 @@ def ai_provider():
     return "none"
 
 
-def split_display_and_speech(raw_reply, language="auto"):
-    """Extract [[SPEAK: ...]] phonetic text for TTS while keeping clean display text."""
-    match = re.search(r"\[\[SPEAK:\s*(.*?)\s*\]\]", raw_reply, flags=re.DOTALL | re.IGNORECASE)
-    if match:
-        speak_part = match.group(1).strip()
-        display_part = re.sub(r"\s*\[\[SPEAK:\s*.*?\s*\]\]\s*", "", raw_reply, flags=re.DOTALL | re.IGNORECASE).strip()
-        if language == "pa-IN":
-            display_part = re.sub(r"[\u0900-\u097F\u0C00-\u0C7F]+", "", display_part).strip()
-        return display_part or speak_part, speak_part or display_part
-    cleaned = raw_reply.strip()
+def clean_reply_text(raw_reply: str, language: str = "auto") -> str:
+    cleaned = re.sub(r"\[\[SPEAK:[\s\S]*?(?:\]\]|$)", "", str(raw_reply or ""), flags=re.IGNORECASE).strip()
     if language == "pa-IN":
         cleaned = re.sub(r"[\u0900-\u097F\u0C00-\u0C7F]+", "", cleaned).strip()
-    return cleaned, cleaned
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    if cleaned and cleaned[-1] not in ".!?।":
+        cleaned += "।" if language == "pa-IN" else "."
+    return cleaned
+
+
+def call_llm(system_prompt: str, user_prompt: str, max_tokens: int = 250, temperature: float = 0.25, timeout: int = 10) -> str:
+    provider = ai_provider()
+    if provider == "none":
+        raise HTTPException(503, "AI is not configured. Set GEMINI_API_KEY or OPENAI_API_KEY on the server.")
+    if provider == "gemini":
+        key = os.environ["GEMINI_API_KEY"].strip()
+        model = os.environ.get("GEMINI_MODEL", "gemini-flash-lite-latest").strip()
+        if not model or not all(c.isalnum() or c in "-_." for c in model):
+            raise HTTPException(503, "Invalid GEMINI_MODEL configuration")
+        url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent"
+        payload = {
+            "systemInstruction": {"parts": [{"text": system_prompt}]},
+            "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
+            "generationConfig": {"maxOutputTokens": max_tokens, "temperature": temperature},
+        }
+        headers = {"x-goog-api-key": key, "Content-Type": "application/json"}
+    else:
+        key = os.environ["OPENAI_API_KEY"].strip()
+        url = "https://api.openai.com/v1/chat/completions"
+        payload = {
+            "model": os.environ.get("OPENAI_MODEL", "gpt-4.1-mini"),
+            "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
+            "max_completion_tokens": max_tokens,
+        }
+        headers = {"Authorization": "Bearer " + key, "Content-Type": "application/json"}
+    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            data = json.load(response)
+        if provider == "gemini":
+            parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
+            answer = "\n".join(part.get("text", "") for part in parts if isinstance(part, dict))
+        else:
+            answer = data["choices"][0]["message"]["content"]
+        if not isinstance(answer, str) or not answer.strip():
+            raise ValueError("Empty model reply")
+        return answer.strip()
+    except urllib.error.HTTPError as e:
+        status = e.code
+        if status in (401, 403):
+            raise HTTPException(502, provider.upper() + " rejected the API key or permissions (upstream " + str(status) + ").") from e
+        if status in (500, 502, 503, 504):
+            raise HTTPException(503, provider.upper() + " temporarily unavailable (upstream " + str(status) + "). Please retry shortly.") from e
+        if status == 429:
+            raise HTTPException(503, provider.upper() + " rate limit or quota reached (upstream 429). Check free-tier availability.") from e
+        if status == 404:
+            raise HTTPException(502, provider.upper() + " model unavailable (upstream 404). Check model configuration.") from e
+        raise HTTPException(502, provider.upper() + " provider error (upstream " + str(status) + ").") from e
+    except (TimeoutError, urllib.error.URLError) as e:
+        raise HTTPException(504, "AI provider connection timed out or failed.") from e
+    except Exception as e:
+        raise HTTPException(502, "AI provider returned an invalid or empty response.") from e
 
 
 def ai_reply(message, voice_mode=False, language="auto"):
@@ -255,9 +427,9 @@ def ai_reply(message, voice_mode=False, language="auto"):
         "te-IN": "Telugu",
         "pa-IN": (
             "polished, natural everyday bolchal Punjabi written STRICTLY in Gurmukhi script "
-            "(use simple everyday Punjabi words like ਕਿੱਦਾਂ, ਦੱਸੋ, ਮੈਂ ਕਰ ਸਕਦੀ ਹਾਂ, ਬਿਲਕੁਲ, ਸੋਹਣਾ; "
-            "avoid stiff bookish/Sanskritized words and never mix Hindi or English in the main reply) "
-            "AND at the end append [[SPEAK: <short natural spoken Punjabi pronunciation written in Devanagari script>]]"
+            "(use clear, simple Punjabi words like ਕਿੱਦਾਂ, ਦੱਸੋ, ਮੈਂ ਕਰ ਸਕਦੀ ਹਾਂ, ਬਿਲਕੁਲ, ਠੀਕ ਹੈ; "
+            "avoid stiff bookish/Sanskritized words and never mix Hindi or English in the main reply; "
+            "always complete the sentence naturally)"
         ),
         "pa-Latn-IN": "natural everyday bolchal Punjabi written ONLY in Roman (Latin) script, with authentic Punjabi words",
         "ur-PK": "Urdu",
@@ -271,61 +443,14 @@ def ai_reply(message, voice_mode=False, language="auto"):
     )
     if voice_mode:
         prompt_text += (
-            "\n[VOICE RESPONSE: Reply very fast in plain text with no Markdown. "
-            "Keep it to 1 short, warm, natural spoken sentence.]"
+            "\n[VOICE RESPONSE: Reply in plain text with no Markdown or tags. "
+            "Keep it to 1 complete, warm, natural spoken sentence that never cuts off.]"
         )
-    provider = ai_provider()
-    if provider == "none":
-        raise HTTPException(503, "AI is not configured. Set GEMINI_API_KEY or OPENAI_API_KEY on the server.")
-    if provider == "gemini":
-        key = os.environ["GEMINI_API_KEY"].strip()
-        model = os.environ.get("GEMINI_MODEL", "gemini-flash-lite-latest").strip()
-        if not model or not all(c.isalnum() or c in "-_." for c in model):
-            raise HTTPException(503, "Invalid GEMINI_MODEL configuration")
-        url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent"
-        max_tokens = 65 if voice_mode else 320
-        payload = {
-            "systemInstruction": {"parts": [{"text": SYSTEM}]},
-            "contents": [{"role": "user", "parts": [{"text": prompt_text}]}],
-            "generationConfig": {"maxOutputTokens": max_tokens, "temperature": 0.35},
-        }
-        headers = {"x-goog-api-key": key, "Content-Type": "application/json"}
-    else:
-        key = os.environ["OPENAI_API_KEY"].strip()
-        url = "https://api.openai.com/v1/chat/completions"
-        payload = {
-            "model": os.environ.get("OPENAI_MODEL", "gpt-4.1-mini"),
-            "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt_text}],
-            "max_completion_tokens": 80 if voice_mode else 420,
-        }
-        headers = {"Authorization": "Bearer " + key, "Content-Type": "application/json"}
-    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
-    try:
-        with urllib.request.urlopen(req, timeout=16) as response:
-            data = json.load(response)
-        if provider == "gemini":
-            parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
-            answer = "\n".join(part.get("text", "") for part in parts if isinstance(part, dict))
-        else:
-            answer = data["choices"][0]["message"]["content"]
-        if not isinstance(answer, str) or not answer.strip():
-            raise ValueError("Empty model reply")
-        return split_display_and_speech(answer.strip(), language)
-    except urllib.error.HTTPError as e:
-        status = e.code
-        if status in (401, 403):
-            raise HTTPException(502, provider.upper() + " rejected the API key or permissions (upstream " + str(status) + ").") from e
-        if status in (500, 502, 503, 504):
-            raise HTTPException(503, provider.upper() + " temporarily unavailable (upstream " + str(status) + "). Please retry shortly.") from e
-        if status == 429:
-            raise HTTPException(503, provider.upper() + " rate limit or quota reached (upstream 429). Check free-tier availability.") from e
-        if status == 404:
-            raise HTTPException(502, provider.upper() + " model unavailable (upstream 404). Check model configuration.") from e
-        raise HTTPException(502, provider.upper() + " provider error (upstream " + str(status) + ").") from e
-    except (TimeoutError, urllib.error.URLError) as e:
-        raise HTTPException(504, "AI provider connection timed out or failed.") from e
-    except Exception as e:
-        raise HTTPException(502, "AI provider returned an invalid or empty response.") from e
+    max_tokens = 120 if voice_mode else 360
+    answer = call_llm(SYSTEM, prompt_text, max_tokens=max_tokens, temperature=0.2, timeout=10)
+    cleaned = clean_reply_text(answer, language)
+    speak_str = normalize_punjabi_speech(cleaned) if language == "pa-IN" else cleaned
+    return cleaned, speak_str
 
 
 class SpeechRequest(BaseModel):
@@ -341,28 +466,6 @@ TTS_VOICES = {
 }
 
 
-async def resolve_punjabi_voice(edge_tts):
-    now_mono = time.monotonic()
-    if now_mono < _voice_cache["expires"]:
-        return _voice_cache["punjabi_voice"]
-    async with _voice_lock:
-        now_mono = time.monotonic()
-        if now_mono < _voice_cache["expires"]:
-            return _voice_cache["punjabi_voice"]
-        found = None
-        try:
-            catalog = await asyncio.wait_for(edge_tts.list_voices(), timeout=4)
-            punjabi = [v for v in catalog if v.get("Locale", "").lower() == "pa-in"]
-            found = next((v.get("ShortName") for v in punjabi if v.get("Gender", "").lower() == "female"), None)
-            if not found and punjabi:
-                found = punjabi[0].get("ShortName")
-        except Exception:
-            found = None
-        _voice_cache["punjabi_voice"] = found
-        _voice_cache["expires"] = time.monotonic() + 3600
-        return found
-
-
 @app.post("/api/tts", dependencies=[Depends(auth)])
 async def tts(req: SpeechRequest):
     throttle("tts:" + TOKEN[:12], 50, 60)
@@ -372,31 +475,29 @@ async def tts(req: SpeechRequest):
         raise HTTPException(503, "Install edge-tts in the active Python environment") from exc
     try:
         fallback = False
-        rate = "+4%"
+        spoken_input = req.text.strip()
         if req.language == "pa-IN":
-            native_pa = await resolve_punjabi_voice(edge_tts)
-            if native_pa:
-                selected = native_pa
-            else:
-                selected = TTS_VOICES["hi-IN"]
-                fallback = True
-                rate = "-2%"
+            selected = TTS_VOICES["hi-IN"]
+            fallback = True
+            rate = "-4%"
+            if re.search(r"[\u0A00-\u0A7F]", spoken_input):
+                spoken_input = normalize_punjabi_speech(spoken_input)
         else:
             selected = TTS_VOICES[req.language]
             rate = "+8%" if req.language.startswith("en") else "+4%"
 
         async def synthesize():
             data = bytearray()
-            async for chunk in edge_tts.Communicate(req.text, voice=selected, rate=rate).stream():
+            async for chunk in edge_tts.Communicate(spoken_input, voice=selected, rate=rate).stream():
                 if chunk.get("type") == "audio":
                     data.extend(chunk["data"])
                     if len(data) > 8_000_000:
                         raise ValueError("Audio exceeds size limit")
             return bytes(data)
 
-        data = await asyncio.wait_for(synthesize(), timeout=8)
-        if not data:
-            raise ValueError("No audio bytes received")
+        data = await asyncio.wait_for(synthesize(), timeout=6)
+        if len(data) < 600:
+            raise ValueError("Incomplete or empty audio received")
         if not (data.startswith(b"ID3") or (len(data) > 1 and data[0] == 255 and (data[1] & 224) == 224)):
             raise ValueError("TTS returned data that does not look like MP3")
         return Response(
@@ -421,6 +522,38 @@ class DocumentRequest(BaseModel):
     title: str = Field(min_length=1, max_length=180)
     content: str = Field(min_length=1, max_length=30000)
     format: str
+
+
+def expand_detailed_content(title: str, content: str) -> str:
+    raw = content.strip()
+    if len(raw) >= 450 and "\n" in raw:
+        return raw
+    if ai_provider() == "none":
+        return raw
+    doc_prompt = (
+        f"Create a clear, thorough, well-structured document for the title: '{title}'.\n"
+        f"User input/notes: {raw}\n\n"
+        "Include these exact sections using Markdown headings:\n"
+        "## Overview\n"
+        "Write 2 clear paragraphs explaining the topic and context.\n"
+        "## Key Details & Breakdown\n"
+        "Write 4 to 6 bullet points covering core concepts, features, or steps with practical detail.\n"
+        "## Practical Use Cases & Best Practices\n"
+        "Write 3 bullet points or 1 short paragraph showing real-world application and tips.\n"
+        "## Summary\n"
+        "Write 1 concise concluding paragraph.\n"
+        "Use clear, accurate, easy-to-read English unless the input is clearly in another language."
+    )
+    try:
+        return call_llm(
+            "You are a structured technical and business document writer. Produce thorough, well-organized, accurate content.",
+            doc_prompt,
+            max_tokens=900,
+            temperature=0.3,
+            timeout=15,
+        )
+    except Exception:
+        return raw
 
 
 def document_sections(text):
@@ -449,7 +582,8 @@ def generate_document(req: DocumentRequest):
     throttle("document:" + TOKEN[:12], 15, 60)
     if req.format not in ("pdf", "docx"):
         raise HTTPException(400, "Choose pdf or docx")
-    sections = document_sections(req.content)
+    detailed_text = expand_detailed_content(req.title, req.content)
+    sections = document_sections(detailed_text)
     try:
         if req.format == "docx":
             from docx import Document
@@ -480,29 +614,39 @@ def generate_document(req: DocumentRequest):
             from xml.sax.saxutils import escape
 
             font = "Helvetica"
+            has_gurmukhi_font = False
             candidates = [
+                str(ROOT / "fonts" / "NotoSansGurmukhi-Regular.ttf"),
                 str(ROOT / "fonts" / "NotoSans-Regular.ttf"),
+                "C:/Windows/Fonts/raavi.ttf",
+                "/usr/share/fonts/truetype/noto/NotoSansGurmukhi-Regular.ttf",
                 "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                "C:/Windows/Fonts/arial.ttf",
             ]
             for candidate in candidates:
                 if Path(candidate).is_file():
                     try:
                         pdfmetrics.registerFont(TTFont("JarvisUnicode", candidate))
                         font = "JarvisUnicode"
+                        if "gurmukhi" in candidate.lower() or "raavi" in candidate.lower():
+                            has_gurmukhi_font = True
                         break
                     except Exception:
                         pass
+
+            def fmt_pdf(s: str) -> str:
+                val = normalize_punjabi_speech(s) if not has_gurmukhi_font else s
+                return escape(val)
+
             styles = getSampleStyleSheet()
             styles.add(ParagraphStyle(name="JTitle", fontName=font, fontSize=19, leading=26, textColor=colors.HexColor("#15304f"), spaceAfter=18))
             styles.add(ParagraphStyle(name="JHead", fontName=font, fontSize=13, leading=19, textColor=colors.HexColor("#087c9d"), spaceBefore=13, spaceAfter=7))
             styles.add(ParagraphStyle(name="JBody", fontName=font, fontSize=10.5, leading=17, spaceAfter=9))
             bio = io.BytesIO()
-            doc = SimpleDocTemplate(bio, pagesize=(595.28, 841.89), leftMargin=52, rightMargin=52, topMargin=55, bottomMargin=55, title=req.title)
-            story = [Paragraph(escape(req.title), styles["JTitle"])]
+            doc = SimpleDocTemplate(bio, pagesize=(595.28, 841.89), leftMargin=52, rightMargin=52, topMargin=55, bottomMargin=55, title=fmt_pdf(req.title))
+            story = [Paragraph(fmt_pdf(req.title), styles["JTitle"])]
             for typ, txt in sections:
                 style = styles["JHead"] if typ == "heading" else styles["JBody"]
-                story.append(Paragraph(("• " if typ == "bullet" else "") + escape(txt), style))
+                story.append(Paragraph(("• " if typ == "bullet" else "") + fmt_pdf(txt), style))
             story.append(Spacer(1, 20))
             story.append(Paragraph("Prepared using JARVIS AI. Verify factual claims before sharing.", styles["JBody"]))
 
@@ -701,7 +845,7 @@ def health():
     return {
         "ok": True,
         "service": "jarvis-nexus-global",
-        "version": "1.7.0",
+        "version": "1.13.0",
         "ai_configured": provider != "none",
         "ai_provider": provider,
         "token_configured": len(TOKEN) >= 32,
@@ -899,13 +1043,13 @@ def video_lookup(req: VideoLookup):
             "no_warnings": True,
             "skip_download": True,
             "extract_flat": True,
-            "socket_timeout": 4,
+            "socket_timeout": 3,
             "retries": 0,
             "extractor_retries": 0,
             "noplaylist": True,
         }
         with YoutubeDL(opts) as ydl:
-            info = ydl.extract_info("ytsearch3:" + req.query, download=False)
+            info = ydl.extract_info("ytsearch2:" + req.query, download=False)
         entries = (info or {}).get("entries") or []
         for entry in entries:
             if not isinstance(entry, dict):
