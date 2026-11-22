@@ -271,8 +271,8 @@ def ai_reply(message, voice_mode=False, language="auto"):
     )
     if voice_mode:
         prompt_text += (
-            "\n[VOICE RESPONSE: Reply fast in plain text with no Markdown. "
-            "Keep it to 1-2 short, warm, natural spoken sentences.]"
+            "\n[VOICE RESPONSE: Reply very fast in plain text with no Markdown. "
+            "Keep it to 1 short, warm, natural spoken sentence.]"
         )
     provider = ai_provider()
     if provider == "none":
@@ -283,7 +283,7 @@ def ai_reply(message, voice_mode=False, language="auto"):
         if not model or not all(c.isalnum() or c in "-_." for c in model):
             raise HTTPException(503, "Invalid GEMINI_MODEL configuration")
         url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent"
-        max_tokens = 95 if voice_mode else 320
+        max_tokens = 65 if voice_mode else 320
         payload = {
             "systemInstruction": {"parts": [{"text": SYSTEM}]},
             "contents": [{"role": "user", "parts": [{"text": prompt_text}]}],
@@ -296,12 +296,12 @@ def ai_reply(message, voice_mode=False, language="auto"):
         payload = {
             "model": os.environ.get("OPENAI_MODEL", "gpt-4.1-mini"),
             "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt_text}],
-            "max_completion_tokens": 110 if voice_mode else 420,
+            "max_completion_tokens": 80 if voice_mode else 420,
         }
         headers = {"Authorization": "Bearer " + key, "Content-Type": "application/json"}
     req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(req, timeout=18) as response:
+        with urllib.request.urlopen(req, timeout=16) as response:
             data = json.load(response)
         if provider == "gemini":
             parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
@@ -394,7 +394,7 @@ async def tts(req: SpeechRequest):
                         raise ValueError("Audio exceeds size limit")
             return bytes(data)
 
-        data = await asyncio.wait_for(synthesize(), timeout=9)
+        data = await asyncio.wait_for(synthesize(), timeout=8)
         if not data:
             raise ValueError("No audio bytes received")
         if not (data.startswith(b"ID3") or (len(data) > 1 and data[0] == 255 and (data[1] & 224) == 224)):
@@ -701,7 +701,7 @@ def health():
     return {
         "ok": True,
         "service": "jarvis-nexus-global",
-        "version": "1.6.0",
+        "version": "1.7.0",
         "ai_configured": provider != "none",
         "ai_provider": provider,
         "token_configured": len(TOKEN) >= 32,
