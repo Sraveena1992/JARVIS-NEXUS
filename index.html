@@ -488,7 +488,7 @@ function isSpeakingOrBusy() {
   );
 }
 
-function queueRelisten(delay = 220) {
+function queueRelisten(delay = 250) {
   clearTimeout(relistenTimer);
   if (!continuousMode || !conversationMode || document.hidden) return;
   relistenTimer = setTimeout(() => {
@@ -503,6 +503,11 @@ function cleanTranscript(raw) {
     .replace(/\b(\S+)(?:\s+\1){1,}\b/gi, "$1")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function isLikelyMisheardWakeWord(transcript) {
+  const t = cleanTranscript(transcript);
+  return /^(?:ਬਾਰਿਸ਼|बारिश|बारिश बारिश|ਬਾਰਿਸ਼ ਬਾਰਿਸ਼|jarvis|जार्विस|ਜਾਰਵਿਸ)$/i.test(t);
 }
 
 function spokenText(text) {
@@ -563,16 +568,20 @@ function speechChunks(text, max = 180) {
 function stopSpeech() {
   speechGeneration++;
   if (neuralController) {
-    neuralController.abort();
+    try { neuralController.abort(); } catch (e) {}
     neuralController = null;
   }
   if (neuralAudio) {
-    neuralAudio.pause();
-    neuralAudio.removeAttribute("src");
-    neuralAudio.load();
+    try {
+      neuralAudio.pause();
+      neuralAudio.removeAttribute("src");
+      neuralAudio.load();
+    } catch (e) {}
     neuralAudio = null;
   }
-  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  if ("speechSynthesis" in window) {
+    try { speechSynthesis.cancel(); } catch (e) {}
+  }
 }
 
 function browserSpeechFallback(cleaned, lang, generation) {
@@ -623,11 +632,15 @@ async function say(text, speakOverride = null) {
   clearTimeout(relistenTimer);
   if (activeRecognition) {
     try { activeRecognition.abort(); } catch (e) {}
+    activeRecognition = null;
   }
   stopSpeech();
   const generation = speechGeneration;
   const cleaned = spokenText(speakOverride || text);
-  if (!cleaned) return;
+  if (!cleaned) {
+    queueRelisten();
+    return;
+  }
   const lang = speechLanguage(cleaned);
   let fallbackUsed = false;
   let finished = false;
@@ -680,7 +693,7 @@ async function say(text, speakOverride = null) {
       release();
       if (generation === speechGeneration) {
         $("voiceStatus").textContent = "VOICE READY";
-        queueRelisten(220);
+        queueRelisten(250);
       }
     };
     audio.onerror = () => fallbackOnce();
@@ -690,7 +703,10 @@ async function say(text, speakOverride = null) {
       $("voiceStatus").textContent = fallbackVoice === "hi-IN" ? "JARVIS SPEAKING · Punjabi (Bolchal Neural)" : "JARVIS SPEAKING · " + lang;
     }
   } catch (err) {
-    if (generation !== speechGeneration || err.name === "AbortError") return;
+    if (generation !== speechGeneration || err.name === "AbortError") {
+      release();
+      return;
+    }
     fallbackOnce();
   }
 }
@@ -706,9 +722,11 @@ $("conversationToggle").onclick = () => {
 };
 $("stopVoice").onclick = () => {
   conversationMode = false;
+  voiceBusy = false;
   clearTimeout(relistenTimer);
   if (activeRecognition) {
     try { activeRecognition.abort(); } catch (e) {}
+    activeRecognition = null;
   }
   stopSpeech();
   $("voiceStatus").textContent = "VOICE STOPPED";
@@ -927,7 +945,7 @@ async function send(fromVoice = false) {
     if (fromVoice) await say(retryMsg);
   } finally {
     voiceBusy = false;
-    if (fromVoice && !isSpeakingOrBusy()) queueRelisten(220);
+    if (fromVoice && !isSpeakingOrBusy()) queueRelisten(250);
   }
 }
 
@@ -1007,10 +1025,25 @@ function setListening(on) {
 }
 
 function startVoiceRecognition() {
-  if (!conversationMode || isSpeakingOrBusy() || document.hidden) return;
+  if (!conversationMode || voiceBusy || document.hidden) return;
   const R = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!R) { conversationMode = false; show("Speech recognition unsupported. Try Chrome or Edge."); return; }
-  if (!window.isSecureContext) { conversationMode = false; show("Microphone requires HTTPS or localhost."); return; }
+  if (!R) {
+    conversationMode = false;
+    setListening(false);
+    show("Error: Speech recognition unsupported. Try Chrome or Edge.");
+    return;
+  }
+  if (!window.isSecureContext) {
+    conversationMode = false;
+    setListening(false);
+    show("Error: Microphone requires HTTPS or localhost.");
+    return;
+  }
+
+  if (activeRecognition) {
+    try { activeRecognition.abort(); } catch (e) {}
+    activeRecognition = null;
+  }
 
   const rec = new R();
   let finalText = "";
@@ -1045,7 +1078,7 @@ function startVoiceRecognition() {
       endpointTimer = setTimeout(() => {
         if (!finalText) finalText = lastInterim;
         try { rec.stop(); } catch (err) {}
-      }, 850);
+      }, 650);
     }
   };
   rec.onerror = e => {
@@ -1059,7 +1092,7 @@ function startVoiceRecognition() {
       "audio-capture": "No microphone detected.",
       "network": "Speech recognition network error.",
     };
-    if (e.error !== "no-speech") show("Voice error: " + e.error + ". " + (hints[e.error] || ""));
+    if (e.error !== "no-speech") show("Error: Voice recognition failed (" + e.error + "). " + (hints[e.error] || ""));
     if (["not-allowed", "service-not-allowed", "audio-capture", "network"].includes(e.error)) {
       conversationMode = false;
     }
@@ -1071,13 +1104,18 @@ function startVoiceRecognition() {
     if (wasAborted || !conversationMode || document.hidden) return;
     const transcript = cleanTranscript(finalText || lastInterim);
     if (!hadError && transcript) {
+      if (isLikelyMisheardWakeWord(transcript)) {
+        $("message").value = "";
+        queueRelisten(200);
+        return;
+      }
       $("message").value = transcript;
       show("Heard in " + ((performance.now() - started) / 1000).toFixed(1) + " s: " + transcript);
       if (!continuousMode) conversationMode = false;
       send(true);
     } else {
       if (!continuousMode) conversationMode = false;
-      queueRelisten(220);
+      queueRelisten(250);
     }
   };
 
@@ -1087,23 +1125,26 @@ function startVoiceRecognition() {
     activeRecognition = null;
     setListening(false);
     conversationMode = false;
-    show("Cannot start microphone: " + e.message);
+    show("Error: Cannot start microphone — " + e.message);
   }
 }
 
 $("mic").onclick = () => {
-  if (conversationMode) {
+  if (conversationMode || activeRecognition) {
     conversationMode = false;
+    voiceBusy = false;
     clearTimeout(relistenTimer);
     if (activeRecognition) {
       try { activeRecognition.abort(); } catch (e) {}
+      activeRecognition = null;
     }
     setListening(false);
     show("Hands-free conversation paused.");
     return;
   }
-  conversationMode = true;
   stopSpeech();
+  voiceBusy = false;
+  conversationMode = true;
   startVoiceRecognition();
 };
 
@@ -1112,6 +1153,7 @@ document.addEventListener("visibilitychange", () => {
     clearTimeout(relistenTimer);
     if (activeRecognition) {
       try { activeRecognition.abort(); } catch (e) {}
+      activeRecognition = null;
     }
   } else {
     queueRelisten(200);
@@ -1127,11 +1169,14 @@ $("voiceLang").addEventListener("change", () => {
   const choice = $("voiceLang").value;
   try { localStorage.setItem("jarvis_language_preference", choice); } catch (e) {}
   conversationMode = false;
+  voiceBusy = false;
   clearTimeout(relistenTimer);
   if (activeRecognition) {
     try { activeRecognition.abort(); } catch (e) {}
+    activeRecognition = null;
   }
   stopSpeech();
+  setListening(false);
   show("Language set to: " + $("voiceLang").selectedOptions[0].textContent);
 });
 
