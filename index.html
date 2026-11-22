@@ -197,7 +197,7 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
   </aside>
 
   <main id="home">
-    <div class="jarvis-build-stamp">BUILD: NEXUS v4.5 · ULTRA-FAST VOICE &amp; POLISHED PUNJABI</div>
+    <div class="jarvis-build-stamp">BUILD: NEXUS v4.5 · FULL PUNJABI SENTENCE &amp; SPEECH</div>
     <button class="nexus-install hidden" id="installPwaBtn" type="button">📲 Install JARVIS App</button>
 
     <section class="panel hero">
@@ -422,7 +422,11 @@ function node(tag, text) {
 }
 
 function show(msg, who = "JARVIS") {
-  const cleanMsg = String(msg || "").replace(/\s*\n+\s*/g, " ").trim();
+  const cleanMsg = String(msg || "")
+    .replace(/\[\[SPEAK:[\s\S]*?(?:\]\]|$)/gi, "")
+    .replace(/\s*\n+\s*/g, " ")
+    .trim();
+  if (!cleanMsg) return;
   const e = node("div", "");
   e.className = "message";
   const b = node("b", who + ": ");
@@ -512,7 +516,7 @@ function isLikelyMisheardWakeWord(transcript) {
 
 function spokenText(text) {
   return String(text || "")
-    .replace(/\[\[SPEAK:\s*([\s\S]*?)\s*\]\]/gi, "$1")
+    .replace(/\[\[SPEAK:[\s\S]*?(?:\]\]|$)/gi, " ")
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
     .replace(/\*\*(.*?)\*\*/g, "$1")
@@ -610,7 +614,7 @@ function browserSpeechFallback(cleaned, lang, generation) {
     const u = new SpeechSynthesisUtterance(chunks[i++]);
     u.lang = effectiveLang;
     u.voice = selected;
-    u.rate = 1.0;
+    u.rate = 0.96;
     u.onend = next;
     u.onerror = () => {
       if (failed) return;
@@ -937,7 +941,7 @@ async function send(fromVoice = false) {
   } catch (e) {
     const langVal = $("voiceLang").value;
     const retryMsg = langVal === "pa-IN"
-      ? "माफ़ करना, कनेक्शन में थोड़ी दिक्कत आई है। कृपया दोबारा बोलिए।"
+      ? "ਮਾਫ਼ ਕਰਨਾ, ਕਨੈਕਸ਼ਨ ਵਿੱਚ ਥੋੜ੍ਹੀ ਦਿੱਕਤ ਆਈ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਬੋਲੋ।"
       : (langVal === "hi-IN"
         ? "माफ़ कीजिए, कनेक्शन में थोड़ी दिक्कत आई है। कृपया दोबारा बोलिए।"
         : "Sorry, there was a quick connection hiccup. Please try again.");
@@ -1020,7 +1024,7 @@ $("message").onkeydown = e => { if (e.key === "Enter") send(false); };
 function setListening(on) {
   $("mic").setAttribute("aria-pressed", String(on));
   $("mic").textContent = on ? "⏹ STOP LISTENING" : "🎙 START LISTENING";
-  $("voiceStatus").textContent = on ? "● LISTENING — SPEAK NOW" : "VOICE READY · CLICK MICROPHONE";
+  $("voiceStatus").textContent = on ? "● LISTENING — SPEAK FULL SENTENCE" : "VOICE READY · CLICK MICROPHONE";
   document.querySelector(".core-wrap").classList.toggle("listening", on);
 }
 
@@ -1055,7 +1059,7 @@ function startVoiceRecognition() {
   activeRecognition = rec;
 
   const chosen = $("voiceLang").value;
-  rec.lang = chosen === "auto" ? "en-IN" : (chosen === "pa-Latn-IN" ? "pa-IN" : chosen);
+  rec.lang = chosen === "auto" ? "hi-IN" : (chosen === "pa-Latn-IN" ? "pa-IN" : chosen);
   rec.interimResults = true;
   rec.continuous = false;
   rec.maxAlternatives = 1;
@@ -1070,7 +1074,9 @@ function startVoiceRecognition() {
     if (final) {
       finalText = final;
       clearTimeout(endpointTimer);
-      try { rec.stop(); } catch (err) {}
+      endpointTimer = setTimeout(() => {
+        try { rec.stop(); } catch (err) {}
+      }, 450);
       return;
     }
     clearTimeout(endpointTimer);
@@ -1078,7 +1084,7 @@ function startVoiceRecognition() {
       endpointTimer = setTimeout(() => {
         if (!finalText) finalText = lastInterim;
         try { rec.stop(); } catch (err) {}
-      }, 650);
+      }, 1100);
     }
   };
   rec.onerror = e => {
@@ -1156,7 +1162,7 @@ document.addEventListener("visibilitychange", () => {
       activeRecognition = null;
     }
   } else {
-    queueRelisten(200);
+    queueRelisten(250);
   }
 });
 
