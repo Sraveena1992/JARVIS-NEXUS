@@ -26,6 +26,7 @@ from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).resolve().parent
 DB = Path(os.environ.get("JARVIS_DB", str(ROOT / "jarvis.db")))
+WORKSPACE_DIR = Path(os.environ.get("JARVIS_WORKSPACE", str(ROOT / "workspace")))
 TOKEN = os.environ.get("JARVIS_TOKEN", "")
 app = FastAPI(title="JARVIS NEXUS GLOBAL", docs_url=None, redoc_url=None, openapi_url=None)
 _hits = defaultdict(deque)
@@ -134,6 +135,11 @@ class Reminder(BaseModel):
     due: str
 
 
+class FileWriteRequest(BaseModel):
+    path: str = Field(min_length=1, max_length=160)
+    content: str = Field(max_length=50000)
+
+
 OPS = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
@@ -176,6 +182,18 @@ def calc(s):
 def audit(action, detail=""):
     with connect() as c:
         c.execute("INSERT INTO audit(action,detail,created) VALUES(?,?,?)", (action, detail[:200], now()))
+
+
+def resolve_workspace_file(rel_path: str) -> Path:
+    WORKSPACE_DIR.mkdir(parents=True, exist_ok=True)
+    cleaned = rel_path.strip().replace("\\", "/")
+    if not cleaned or cleaned.startswith("/") or ".." in Path(cleaned).parts:
+        raise HTTPException(400, "Invalid relative workspace path")
+    target = (WORKSPACE_DIR / cleaned).resolve()
+    base = WORKSPACE_DIR.resolve()
+    if base not in target.parents:
+        raise HTTPException(400, "Path must stay inside workspace")
+    return target
 
 
 SYSTEM = (
@@ -236,10 +254,16 @@ def ai_reply(message, voice_mode=False, language="auto"):
         "ta-IN": "Tamil",
         "te-IN": "Telugu",
         "pa-IN": (
-            "polished, natural everyday bolchal Punjabi written STRICTLY in Gurmukhi script (ਪੰਜਾਬੀ ਅੱਖਰ ONLY; use simple natural Punjabi words like ਕਿੱਦਾਂ, ਦੱਸੋ, ਮੈਂ ਕਰ ਸਕਦੀ ਹਾਂ, ਬਿਲਕੁਲ, ਸੋਹਣਾ — avoid heavy Sanskritized or stiff bookish words; never mix Hindi Devanagari, Telugu, or English words in the main reply), "
-            "AND on a new line at the very end append [[SPEAK: <natural spoken Punjabi pronunciation written in Devanagari script matching everyday Punjabi bolchal, e.g. सत श्री अकाल जी, मैं तुहाडी की मदद कर सकदी हां>]]"
+            "polished, natural everyday bolchal Punjabi written STRICTLY in Gurmukhi script "
+            "(use simple everyday Punjabi words like ਕਿੱਦਾਂ, ਦੱਸੋ, ਮੈਂ ਕਰ ਸਕਦੀ ਹਾਂ, ਬਿਲਕੁਲ, ਸੋਹਣਾ; "
+            "avoid stiff bookish/Sanskritized words and never mix Hindi or English in the main reply)"
+            + (
+                ""
+                if voice_mode
+                else " AND at the end append [[SPEAK: <short natural spoken Punjabi in Devanagari>]]"
+            )
         ),
-        "pa-Latn-IN": "natural everyday bolchal Punjabi written ONLY in Roman (Latin) script, with authentic Punjabi words and zero Gurmukhi or Hindi characters",
+        "pa-Latn-IN": "natural everyday bolchal Punjabi written ONLY in Roman (Latin) script, with authentic Punjabi words",
         "ur-PK": "Urdu",
     }
     selected = language_names.get(language, "the language of the question")
@@ -251,8 +275,8 @@ def ai_reply(message, voice_mode=False, language="auto"):
     )
     if voice_mode:
         prompt_text += (
-            "\n[VOICE RESPONSE: Reply fast in plain text without Markdown symbols. "
-            "Use 1-2 short, crisp, natural spoken sentences unless more detail is explicitly asked. No repeated greeting.]"
+            "\n[VOICE RESPONSE: Reply very fast in plain text with no Markdown. "
+            "Keep it to 1-2 short, warm, natural spoken sentences so it sounds like a real friendly voice conversation.]"
         )
     provider = ai_provider()
     if provider == "none":
@@ -263,11 +287,11 @@ def ai_reply(message, voice_mode=False, language="auto"):
         if not model or not all(c.isalnum() or c in "-_." for c in model):
             raise HTTPException(503, "Invalid GEMINI_MODEL configuration")
         url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent"
-        max_tokens = 110 if voice_mode else 320
+        max_tokens = 75 if voice_mode else 320
         payload = {
             "systemInstruction": {"parts": [{"text": SYSTEM}]},
             "contents": [{"role": "user", "parts": [{"text": prompt_text}]}],
-            "generationConfig": {"maxOutputTokens": max_tokens, "temperature": 0.3},
+            "generationConfig": {"maxOutputTokens": max_tokens, "temperature": 0.35},
         }
         headers = {"x-goog-api-key": key, "Content-Type": "application/json"}
     else:
@@ -276,12 +300,12 @@ def ai_reply(message, voice_mode=False, language="auto"):
         payload = {
             "model": os.environ.get("OPENAI_MODEL", "gpt-4.1-mini"),
             "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt_text}],
-            "max_completion_tokens": 130 if voice_mode else 420,
+            "max_completion_tokens": 90 if voice_mode else 420,
         }
         headers = {"Authorization": "Bearer " + key, "Content-Type": "application/json"}
     req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(req, timeout=12) as response:
+        with urllib.request.urlopen(req, timeout=18) as response:
             data = json.load(response)
         if provider == "gemini":
             parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
@@ -647,13 +671,41 @@ def google_emails(request: Request):
         raise HTTPException(502, "Could not fetch Gmail inbox") from exc
 
 
+@app.get("/api/files", dependencies=[Depends(auth)])
+def list_workspace_files():
+    WORKSPACE_DIR.mkdir(parents=True, exist_ok=True)
+    items = []
+    for p in sorted(WORKSPACE_DIR.rglob("*")):
+        if p.is_file():
+            items.append({"path": p.relative_to(WORKSPACE_DIR).as_posix(), "bytes": p.stat().st_size})
+    return items[:100]
+
+
+@app.post("/api/files/write", dependencies=[Depends(auth)])
+def write_workspace_file(req: FileWriteRequest):
+    target = resolve_workspace_file(req.path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(req.content, encoding="utf-8")
+    rel = target.relative_to(WORKSPACE_DIR).as_posix()
+    audit("file.write", rel)
+    return {"path": rel, "bytes": target.stat().st_size}
+
+
+@app.get("/api/files/read", dependencies=[Depends(auth)])
+def read_workspace_file(path: str):
+    target = resolve_workspace_file(path)
+    if not target.is_file():
+        raise HTTPException(404, "File not found")
+    return {"path": target.relative_to(WORKSPACE_DIR).as_posix(), "content": target.read_text(encoding="utf-8")}
+
+
 @app.get("/api/health")
 def health():
     provider = ai_provider()
     return {
         "ok": True,
         "service": "jarvis-nexus-global",
-        "version": "1.4.0",
+        "version": "1.5.0",
         "ai_configured": provider != "none",
         "ai_provider": provider,
         "token_configured": len(TOKEN) >= 32,
