@@ -393,16 +393,6 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
       <h2>◈ Activity Audit</h2>
       <div class="scrollbox muted" id="audit"></div>
     </section>
-
-    <section class="panel device-panel">
-      <h2>◉ SYSTEM &amp; DEVICE</h2>
-      <p>Live CPU, RAM, disk and phone status are not connected. No simulated metrics.</p>
-    </section>
-
-    <section class="panel anna-panel">
-      <h2>◈ ANNA AI OS INTEGRATION</h2>
-      <p>Integration and app review pending — not published.</p>
-    </section>
   </aside>
 </div>
 
@@ -929,7 +919,7 @@ async function send(fromVoice = false) {
   } catch (e) {
     const langVal = $("voiceLang").value;
     const retryMsg = langVal === "pa-IN"
-      ? "ਮਾਫ਼ ਕਰਨਾ, ਕਨੈਕਸ਼ਨ ਵਿੱਚ ਥੋੜ੍ਹੀ ਦਿੱਕਤ ਆਈ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਬੋਲੋ।"
+      ? "माफ़ करना, कनेक्शन में थोड़ी दिक्कत आई है। कृपया दोबारा बोलिए।"
       : (langVal === "hi-IN"
         ? "माफ़ कीजिए, कनेक्शन में थोड़ी दिक्कत आई है। कृपया दोबारा बोलिए।"
         : "Sorry, there was a quick connection hiccup. Please try again.");
@@ -1244,8 +1234,15 @@ $("saveFile").onclick = () => run(async () => { const r = await api("/api/files/
 $("readFile").onclick = () => run(async () => { const r = await api("/api/files/read?path=" + encodeURIComponent($("filename").value)); $("filecontent").value = r.content; show("Read " + r.path); });
 $("listFiles").onclick = () => run(async () => { const a = await api("/api/files"); $("filelist").replaceChildren(...a.map(x => node("div", x.path + " (" + x.bytes + " bytes)"))); });
 $("research").onclick = () => run(async () => {
-  const r = await api("/api/research?q=" + encodeURIComponent($("query").value));
+  const q = $("query").value.trim();
+  if (!q) { $("results").textContent = "Enter a topic to search."; return; }
+  $("results").textContent = "Searching Wikipedia...";
+  const r = await api("/api/research?q=" + encodeURIComponent(q));
   $("results").replaceChildren();
+  if (!r.results || !r.results.length) {
+    $("results").textContent = "No Wikipedia articles found for \"" + q + "\". Try broader keywords.";
+    return;
+  }
   for (const x of r.results) {
     const p = node("p", x.title + " — " + x.summary + " ");
     const a = node("a", "Source");
