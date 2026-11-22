@@ -256,12 +256,8 @@ def ai_reply(message, voice_mode=False, language="auto"):
         "pa-IN": (
             "polished, natural everyday bolchal Punjabi written STRICTLY in Gurmukhi script "
             "(use simple everyday Punjabi words like ਕਿੱਦਾਂ, ਦੱਸੋ, ਮੈਂ ਕਰ ਸਕਦੀ ਹਾਂ, ਬਿਲਕੁਲ, ਸੋਹਣਾ; "
-            "avoid stiff bookish/Sanskritized words and never mix Hindi or English in the main reply)"
-            + (
-                ""
-                if voice_mode
-                else " AND at the end append [[SPEAK: <short natural spoken Punjabi in Devanagari>]]"
-            )
+            "avoid stiff bookish/Sanskritized words and never mix Hindi or English in the main reply) "
+            "AND at the end append [[SPEAK: <short natural spoken Punjabi pronunciation written in Devanagari script>]]"
         ),
         "pa-Latn-IN": "natural everyday bolchal Punjabi written ONLY in Roman (Latin) script, with authentic Punjabi words",
         "ur-PK": "Urdu",
@@ -275,8 +271,8 @@ def ai_reply(message, voice_mode=False, language="auto"):
     )
     if voice_mode:
         prompt_text += (
-            "\n[VOICE RESPONSE: Reply very fast in plain text with no Markdown. "
-            "Keep it to 1-2 short, warm, natural spoken sentences so it sounds like a real friendly voice conversation.]"
+            "\n[VOICE RESPONSE: Reply fast in plain text with no Markdown. "
+            "Keep it to 1-2 short, warm, natural spoken sentences.]"
         )
     provider = ai_provider()
     if provider == "none":
@@ -287,7 +283,7 @@ def ai_reply(message, voice_mode=False, language="auto"):
         if not model or not all(c.isalnum() or c in "-_." for c in model):
             raise HTTPException(503, "Invalid GEMINI_MODEL configuration")
         url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent"
-        max_tokens = 75 if voice_mode else 320
+        max_tokens = 95 if voice_mode else 320
         payload = {
             "systemInstruction": {"parts": [{"text": SYSTEM}]},
             "contents": [{"role": "user", "parts": [{"text": prompt_text}]}],
@@ -300,7 +296,7 @@ def ai_reply(message, voice_mode=False, language="auto"):
         payload = {
             "model": os.environ.get("OPENAI_MODEL", "gpt-4.1-mini"),
             "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt_text}],
-            "max_completion_tokens": 90 if voice_mode else 420,
+            "max_completion_tokens": 110 if voice_mode else 420,
         }
         headers = {"Authorization": "Bearer " + key, "Content-Type": "application/json"}
     req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
@@ -384,7 +380,7 @@ async def tts(req: SpeechRequest):
             else:
                 selected = TTS_VOICES["hi-IN"]
                 fallback = True
-                rate = "+2%"
+                rate = "-2%"
         else:
             selected = TTS_VOICES[req.language]
             rate = "+8%" if req.language.startswith("en") else "+4%"
@@ -705,7 +701,7 @@ def health():
     return {
         "ok": True,
         "service": "jarvis-nexus-global",
-        "version": "1.5.0",
+        "version": "1.6.0",
         "ai_configured": provider != "none",
         "ai_provider": provider,
         "token_configured": len(TOKEN) >= 32,
@@ -823,26 +819,40 @@ def audit_log():
 def research(q: str):
     if not q.strip() or len(q) > 120:
         raise HTTPException(400, "Query must be 1–120 characters")
-    url = "https://en.wikipedia.org/w/api.php?" + urllib.parse.urlencode(
+    headers = {"User-Agent": "JARVIS-NEXUS-Global/1.0 (research prototype)"}
+    gen_url = "https://en.wikipedia.org/w/api.php?" + urllib.parse.urlencode(
         {"action": "query", "generator": "search", "gsrsearch": q, "gsrlimit": 5, "prop": "extracts", "exintro": 1, "explaintext": 1, "exsentences": 2, "format": "json"}
     )
-    req = urllib.request.Request(url, headers={"User-Agent": "JARVIS-NEXUS-Global/1.0 (research prototype)"})
     try:
-        with urllib.request.urlopen(req, timeout=10) as r:
+        with urllib.request.urlopen(urllib.request.Request(gen_url, headers=headers), timeout=10) as r:
             data = json.load(r)
-    except Exception as e:
-        raise HTTPException(502, "Wikipedia lookup unavailable") from e
-    return {
-        "provider": "Wikipedia",
-        "results": [
+        results = [
             {
                 "title": p.get("title", ""),
                 "summary": p.get("extract", "")[:600],
                 "url": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(p.get("title", "").replace(" ", "_")),
             }
             for p in data.get("query", {}).get("pages", {}).values()
-        ],
-    }
+            if p.get("title")
+        ]
+        if not results:
+            sr_url = "https://en.wikipedia.org/w/api.php?" + urllib.parse.urlencode(
+                {"action": "query", "list": "search", "srsearch": q, "srlimit": 5, "format": "json"}
+            )
+            with urllib.request.urlopen(urllib.request.Request(sr_url, headers=headers), timeout=10) as sr:
+                sdata = json.load(sr)
+            results = [
+                {
+                    "title": item.get("title", ""),
+                    "summary": re.sub(r"<[^>]+>", "", item.get("snippet", ""))[:600] or "Wikipedia search match.",
+                    "url": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(item.get("title", "").replace(" ", "_")),
+                }
+                for item in sdata.get("query", {}).get("search", [])
+                if item.get("title")
+            ]
+    except Exception as e:
+        raise HTTPException(502, "Wikipedia lookup unavailable") from e
+    return {"provider": "Wikipedia", "results": results}
 
 
 class DesktopLaunch(BaseModel):
