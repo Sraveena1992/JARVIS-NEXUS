@@ -153,7 +153,7 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
 <header>
   <div class="logo">
     <div class="logo-icon"><img alt="JARVIS-AI logo" height="54" src="/jarvis-nexus-logo.png" width="54"/></div>
-    <div><h1>JARVIS-AI</h1><small>NEXUS v4.6 · MOBILE READY</small></div>
+    <div><h1>JARVIS-AI</h1><small>NEXUS v4.7 · MOBILE READY</small></div>
   </div>
   <span class="brand-subtitle">Your AI Personal Assistant</span>
   <span class="header-tag">☁ Cloud ready</span>
@@ -389,14 +389,11 @@ function openExternalSmart(url, label) {
   a.textContent = "↗ Open " + label;
   $("log").append(a);
   $("log").scrollTop = $("log").scrollHeight;
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-  if (isMobile || isStandalone) {
-    window.location.assign(url);
-    return;
-  }
+
   const tab = window.open(url, "_blank", "noopener,noreferrer");
-  if (!tab) window.location.assign(url);
+  if (!tab) {
+    show("Popup blocked by browser. Tap the '↗ Open " + label + "' link above.");
+  }
 }
 
 async function api(path, method = "GET", body) {
@@ -861,7 +858,10 @@ async function send(fromVoice = false) {
       }
       return;
     }
-    const callMatch = m.toLowerCase().replace(/^(?:hey[ ,]*)?jarvis[,: ]*/i, "").match(/^(?:connect a )?(?:call|phone|dial)\s+(?:to\s+)?(.+)$/i);
+    const callMatch = m
+      .toLowerCase()
+      .replace(/^(?:hey[ ,]*)?jarvis[,: ]*/i, "")
+      .match(/^(?:please\s+)?(?:connect(?:\s+(?:a|the))?\s+call|call|phone|dial)\s+(?:to\s+)?(.+)$/i);
     if (callMatch) {
       const targetName = callMatch[1].trim();
       try {
@@ -871,19 +871,21 @@ async function send(fromVoice = false) {
           const info = c.name + (c.phone ? " · " + c.phone : "") + (c.email ? " · " + c.email : "");
           show("Found contact: " + info);
           if (c.phone) {
+            const cleanPhone = c.phone.replace(/[^+\d]/g, "");
             const a = document.createElement("a");
-            a.href = "tel:" + c.phone.replace(/[^+\d]/g, "");
-            a.textContent = "📞 Dial " + c.name + " (" + c.phone + ")";
+            a.href = "tel:" + cleanPhone;
+            a.textContent = "📞 Tap to Call " + c.name + " (" + c.phone + ")";
             $("log").append(a);
+            $("log").scrollTop = $("log").scrollHeight;
           }
           if (voice) await say("Found " + c.name + " in your contacts.");
         } else {
-          const msg = "No contact named " + targetName + " found in synced Google Contacts.";
+          const msg = "No contact named " + targetName + " found in Google Contacts.";
           show(msg);
           if (voice) await say(msg);
         }
       } catch (err) {
-        const msg = "Connect Google Contacts first to look up " + targetName + ".";
+        const msg = "Connect Google Contacts first to find " + targetName + ".";
         show(msg);
         if (voice) await say(msg);
       }
