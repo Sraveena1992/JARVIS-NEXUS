@@ -264,7 +264,6 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
 
     <section class="panel" id="quickActionsPanel">
       <h2>◈ 3. QUICK APPS &amp; WEB ACTIONS</h2>
-      <p class="footnote">Mobile shortcuts open websites or JARVIS tools. Windows desktop apps work only on the local Windows PC.</p>
       <div class="actionbar">
         <button data-web="https://www.youtube.com/" data-label="YouTube" type="button"><span class="action-icon" aria-hidden="true">▶</span>YouTube</button>
         <button data-web="https://www.google.com/" data-label="Google" type="button"><span class="action-icon" aria-hidden="true">🌐</span>Google</button>
@@ -390,14 +389,14 @@ function openExternalSmart(url, label) {
   a.textContent = "↗ Open " + label;
   $("log").append(a);
   $("log").scrollTop = $("log").scrollHeight;
-  // Mobile links open in a separate tab when allowed, keeping JARVIS available.
-  // The visible anchor remains a fallback for browsers that block pop-ups.
-  const tab = window.open(url, "_blank");
-  if (tab) {
-    try { tab.opener = null; } catch (e) {}
-  } else {
-    show("Tap the Open " + label + " link above to continue.");
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  if (isMobile || isStandalone) {
+    window.location.assign(url);
+    return;
   }
+  const tab = window.open(url, "_blank", "noopener,noreferrer");
+  if (!tab) window.location.assign(url);
 }
 
 async function api(path, method = "GET", body) {
@@ -736,9 +735,13 @@ $("mobileGmailBtn").onclick = () => {
 };
 
 $("mobileContactsBtn").onclick = () => {
-  // The Google Contacts website works without JARVIS OAuth setup.
-  // The separate Connect Google control is for reading contacts inside JARVIS.
-  openExternalSmart("https://contacts.google.com/", "Google Contacts");
+  const panel = $("googlePanel");
+  if (panel) panel.scrollIntoView({ behavior: "smooth" });
+  if (token) {
+    $("fetchContacts").click();
+  } else {
+    openExternalSmart("https://contacts.google.com/", "Google Contacts");
+  }
 };
 
 $("mobileCalcBtn").onclick = () => {
