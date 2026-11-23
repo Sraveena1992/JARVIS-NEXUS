@@ -11,7 +11,7 @@
 <style>
 :root{color-scheme:dark;--electric:#00cfff;--amber:#ff8c13;font-family:"Segoe UI",Arial,sans-serif;font-size:16px;color:#d8f7ff;background:#020914}
 *{box-sizing:border-box}
-html{scroll-padding-top:90px}
+html{scroll-padding-top:78px}
 body{margin:0;min-height:100dvh;background:radial-gradient(ellipse at 55% 32%,#092747 0%,#010816 58%,#01040c 100%)}
 .hidden{display:none!important}
 button,input,textarea,select{font:inherit}
@@ -26,47 +26,55 @@ input:focus,textarea:focus,select:focus{outline:1px solid #2de5ff}
 small,.muted{font-size:12px;color:#8db8c9}
 a{color:#7deeff}
 
-header{position:sticky;top:0;z-index:999;min-height:84px;border-bottom:2px solid #11caff;background:linear-gradient(95deg,#03152b,#010712 45%,#051527);display:flex;align-items:center;justify-content:flex-start;padding:8px 20px;gap:12px;box-shadow:0 3px 25px #02caff45}
-header .logo{display:flex;gap:12px;align-items:center;min-width:220px}
-.logo-icon{border:2px solid #14d9ff;border-radius:50%;width:64px;height:64px;overflow:hidden;flex-shrink:0;box-shadow:0 0 18px #00d8ff77}
+header{position:sticky;top:0;z-index:999;min-height:76px;border-bottom:2px solid #11caff;background:linear-gradient(95deg,#03152b,#010712 45%,#051527);display:flex;align-items:center;justify-content:flex-start;padding:8px 18px;gap:12px;box-shadow:0 3px 25px #02caff45}
+header .logo{display:flex;gap:10px;align-items:center;min-width:190px}
+.logo-icon{border:2px solid #14d9ff;border-radius:50%;width:54px;height:54px;overflow:hidden;flex-shrink:0;box-shadow:0 0 18px #00d8ff77}
 .logo-icon img{width:100%;height:100%;object-fit:contain;display:block}
-header h1{font-size:28px;letter-spacing:1px;margin:0;color:#e8faff;text-shadow:0 0 15px #00aaff}
-header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;display:block}
-.brand-subtitle{font-size:15px;color:#e4f5ff;flex:1}
-.header-tag{border:1px solid #165677;padding:7px 12px;border-radius:25px;font-size:11px;color:#9ceaff;white-space:nowrap}
-.pill{border:1px solid #168653;border-radius:25px;padding:8px 12px;color:#60ff96;font-size:12px;white-space:nowrap}
+header h1{font-size:24px;letter-spacing:1px;margin:0;color:#e8faff;text-shadow:0 0 15px #00aaff}
+header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;display:block}
+.brand-subtitle{font-size:14px;color:#e4f5ff;flex:1}
+.header-tag{border:1px solid #165677;padding:6px 11px;border-radius:25px;font-size:11px;color:#9ceaff;white-space:nowrap}
+.pill{border:1px solid #168653;border-radius:25px;padding:7px 11px;color:#60ff96;font-size:12px;white-space:nowrap}
 
 .layout{max-width:1900px;margin:auto;padding:12px;display:grid;grid-template-columns:clamp(215px,15.5vw,255px) minmax(0,1fr) clamp(260px,18.5vw,320px);gap:13px;align-items:start}
-.panel{border:1px solid #05b8ed;border-radius:12px;background:linear-gradient(160deg,#05192d,#010b1b);box-shadow:inset 0 0 18px #00bfff12,0 0 12px #00bfff15;position:relative;padding:12px;margin-bottom:11px;scroll-margin-top:90px}
+.panel{border:1px solid #05b8ed;border-radius:12px;background:linear-gradient(160deg,#05192d,#010b1b);box-shadow:inset 0 0 18px #00bfff12,0 0 12px #00bfff15;position:relative;padding:12px;margin-bottom:11px;scroll-margin-top:86px}
 .panel:before{content:'';position:absolute;top:-1px;left:12px;width:45px;height:2px;background:linear-gradient(90deg,#ff981f,#44f3ff);box-shadow:0 0 12px #00dfff}
 .panel h2{font-size:14px;margin:0 0 10px;color:#b9f8ff;text-transform:uppercase;letter-spacing:.6px}
 
-.sidebar{position:sticky;top:96px;min-width:0}
+.sidebar{position:sticky;top:90px;min-width:0}
 .navbtn{display:block;width:100%;border:0;border-bottom:1px solid #0a3650;border-radius:6px;text-align:left;background:transparent;padding:11px;font-size:14px;min-height:42px}
 .navbtn.active{border:1px solid #32eaff;background:linear-gradient(90deg,#09517d,#07334f);box-shadow:0 0 18px #00cfff77}
-.planned-nav{opacity:.55}
 .statrow{display:flex;justify-content:space-between;border-bottom:1px solid #174157;padding:7px 0;font-size:12px}
 .statrow span:last-child{color:#70f2d4}
 .security{font-size:11px;color:#8cb6c6;margin:7px 0}
 .nav-target-highlight{outline:3px solid #47eeff!important;outline-offset:2px;box-shadow:0 0 28px #00dfff88!important}
 #navFeedback{font-size:11px;color:#9af7ff;margin:8px 3px 2px;min-height:14px}
 
-.jarvis-build-stamp{font-size:12px;line-height:1.5;color:#8cf9ef;margin-bottom:6px}
 .hero{padding:0;overflow:hidden}
-.hero-art{height:225px;position:relative;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#0b3b65 0%,#031223 70%);overflow:hidden}
-.reference-hero-image{width:auto;max-width:min(100%,950px);height:100%;max-height:225px;object-fit:contain;display:block}
+.hero-art{height:190px;position:relative;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#0b3b65 0%,#031223 70%);overflow:hidden}
+.reference-hero-image{width:auto;max-width:min(100%,950px);height:100%;max-height:190px;object-fit:contain;display:block}
 .hero .core-wrap{position:absolute;left:50%;top:20%;transform:translateX(-50%);height:30px;width:30px;pointer-events:none}
-.hero-caption{text-align:center;font-size:13px;letter-spacing:1.2px;color:#8ad9f8;padding:10px;background:#041022}
+.hero-caption{text-align:center;font-size:12px;letter-spacing:1.1px;color:#8ad9f8;padding:8px;background:#041022}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 
-.actionbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:12px}
-.actionbar button{font-size:15px;font-weight:650;min-height:74px;line-height:1.3;padding:8px 6px}
-.actionbar button .action-icon{display:block;font-size:26px;line-height:1.2;margin-bottom:4px}
+.reference-voice{background:radial-gradient(ellipse at 50% 100%,#09416e,#020d20 65%);border-bottom:2px solid var(--amber)}
+.voice-dock{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:4px}
+.voice-status{font-size:12px;color:#8cf4ff;max-width:340px;line-height:1.45}
+.mic-cluster{display:flex;align-items:center;justify-content:center;gap:12px;flex:1;min-width:220px}
+#mic{min-width:205px;min-height:60px;border:2px solid #21e7ff;border-radius:60px;background:radial-gradient(#0e8ed2,#07345d);box-shadow:0 0 24px #00bfff80;font-weight:700;font-size:15px}
+#mic[aria-pressed="true"]{background:linear-gradient(110deg,#b51b55,#ff5577);box-shadow:0 0 22px #ff457eaa}
+.voice-wave{height:44px;display:flex;align-items:center;justify-content:center;gap:3px;min-width:56px}
+.voice-wave i{display:block;width:4px;height:12px;border-radius:9px;background:linear-gradient(#8affff,#00aaff);animation:jarvis-wave .8s ease-in-out infinite alternate}
+.voice-wave i:nth-child(2n){animation-duration:.6s}
+.voice-wave i:nth-child(3n){animation-duration:1.05s}
+@keyframes jarvis-wave{from{transform:scaleY(.35);opacity:.5}to{transform:scaleY(2.1);opacity:1}}
+.voice-dock select{width:auto;max-width:220px;font-size:13px;min-height:44px}
+.footnote{color:#7caabc;font-size:11px;padding:6px 4px 0;margin:0;line-height:1.45}
 
-.log{height:185px;overflow:auto;border:1px solid #156886;background:#020c19;padding:12px;border-radius:8px;white-space:pre-wrap;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.log{height:185px;overflow:auto;border:1px solid #156886;background:#020c19;padding:12px;border-radius:8px;white-space:pre-wrap;font-size:14px;line-height:1.55;overflow-wrap:anywhere}
 .message{margin-bottom:10px}
 .message b{color:#6eefff}
-.message a{display:inline-block;margin:5px 0;padding:6px 9px;border:1px solid #21d9ee;border-radius:6px}
+.message a{display:inline-block;margin:5px 0;padding:7px 10px;border:1px solid #21d9ee;border-radius:8px;background:#052238;text-decoration:none}
 .bar{display:flex;gap:7px;margin-top:8px;align-items:center}
 .bar>input{flex:1}
 .bar button{white-space:nowrap}
@@ -74,26 +82,16 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
 .quick{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
 .quick button{font-size:12px}
 .jarvis-doc-tools{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
-.jarvis-doc-tools button{font-size:12px;min-height:38px}
+.jarvis-doc-tools button{font-size:12px;min-height:40px}
 
-.reference-voice{background:radial-gradient(ellipse at 50% 100%,#09416e,#020d20 65%);border-bottom:2px solid var(--amber)}
-.voice-dock{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:8px 4px}
-.voice-status{font-size:12px;color:#8cf4ff;max-width:320px;line-height:1.45}
-.mic-cluster{display:flex;align-items:center;justify-content:center;gap:12px;flex:1;min-width:220px}
-#mic{min-width:190px;min-height:64px;border:2px solid #21e7ff;border-radius:60px;background:radial-gradient(#0e8ed2,#07345d);box-shadow:0 0 24px #00bfff80;font-weight:700}
-#mic[aria-pressed="true"]{background:linear-gradient(110deg,#b51b55,#ff5577);box-shadow:0 0 22px #ff457eaa}
-.voice-wave{height:48px;display:flex;align-items:center;justify-content:center;gap:3px;min-width:64px}
-.voice-wave i{display:block;width:4px;height:12px;border-radius:9px;background:linear-gradient(#8affff,#00aaff);animation:jarvis-wave .8s ease-in-out infinite alternate}
-.voice-wave i:nth-child(2n){animation-duration:.6s}
-.voice-wave i:nth-child(3n){animation-duration:1.05s}
-@keyframes jarvis-wave{from{transform:scaleY(.35);opacity:.5}to{transform:scaleY(2.1);opacity:1}}
-.voice-dock select{width:auto;max-width:210px;font-size:12px;min-height:42px}
-.footnote{color:#7caabc;font-size:11px;padding:6px 4px 0;margin:0;line-height:1.45}
+.actionbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:4px 0}
+.actionbar button{font-size:14px;font-weight:650;min-height:68px;line-height:1.25;padding:8px 6px}
+.actionbar button .action-icon{display:block;font-size:22px;line-height:1.2;margin-bottom:4px}
 
 .right .panel{padding:12px}
 .right .panel h2{font-size:13px}
 .quicklinks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.quicklinks button{font-size:12px;min-height:40px}
+.quicklinks button{font-size:12px;min-height:42px}
 .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .summary div{padding:9px 4px;border:1px solid #1c7899;text-align:center;border-radius:6px;font-size:11px;color:#80eaff}
 .summary strong{display:block;font-size:20px;color:#fff}
@@ -113,39 +111,40 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
 }
 
 @media(max-width:760px){
- html,body{max-width:100%;overflow-x:hidden;padding-bottom:82px}
+ html,body{max-width:100%;overflow-x:hidden;padding-bottom:74px}
  button,input,textarea,select{max-width:100%;touch-action:manipulation}
  button{min-height:46px}
- input,textarea{font-size:16px!important}
- header{min-height:68px;padding:8px 12px;gap:8px;flex-wrap:wrap}
- .logo-icon{width:46px;height:46px}
- header h1{font-size:20px}
- header small{font-size:11px}
+ input,textarea,select{font-size:16px!important}
+ header{min-height:64px;padding:8px 12px;gap:8px}
+ .logo-icon{width:42px;height:42px}
+ header h1{font-size:19px}
+ header small{font-size:10px}
  header .pill{font-size:11px;padding:6px 10px}
  .layout{display:flex;flex-direction:column;gap:8px;padding:8px}
  .layout>main,.layout>.right,.layout>.sidebar{width:100%;min-width:0}
  .layout>main{order:1}
  .layout>.right{order:2;display:flex;flex-direction:column;gap:8px}
- .layout>.sidebar{order:3;position:static}
- .sidebar .panel:nth-child(2){display:none}
- .hero-art{height:150px;max-height:150px}
- .hero-caption{font-size:10px;letter-spacing:.4px;padding:7px}
- .actionbar{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px}
- .actionbar button{min-height:58px;font-size:14px}
- .actionbar button .action-icon{font-size:20px;margin-bottom:2px}
+ .layout>.sidebar{display:none}
+ #rightNav,#desktopPanel,#auditpanel{display:none}
+ .hero-art{height:126px;max-height:126px}
+ .reference-hero-image{max-height:126px}
+ .hero-caption{font-size:10px;letter-spacing:.3px;padding:6px}
+ .mic-cluster{width:100%;flex-wrap:wrap;gap:8px}
+ #mic{width:100%;min-width:0;min-height:58px;font-size:16px}
+ .voice-dock select{width:100%;max-width:100%}
+ .voice-wave{display:none}
  .bar{flex-wrap:wrap}
  .bar>input{flex-basis:100%}
  .bar button{flex:1}
- .mic-cluster{width:100%;flex-wrap:wrap;gap:8px}
- #mic{width:100%;min-width:0;min-height:58px}
- .voice-dock select{width:100%;max-width:100%}
- .voice-wave{display:none}
+ .actionbar{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .actionbar button{min-height:60px;font-size:14px}
+ .actionbar button .action-icon{font-size:20px;margin-bottom:2px}
  .right .quicklinks{grid-template-columns:repeat(2,minmax(0,1fr))}
  .jarvis-doc-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
- .nexus-install{display:block;margin:0 8px 8px}
- .nexus-mobile-bar{position:fixed;z-index:1000;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;background:#020b19f5;border-top:1px solid #22c7e9;padding:6px max(6px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left))}
- .nexus-mobile-bar button{padding:8px 3px;font-size:11px;min-height:46px;border-radius:8px}
- .nexus-mobile-bar button.active{border-color:#ff981f;color:#ffcb91}
+ .nexus-install{display:block;width:100%;margin:0 0 8px}
+ .nexus-mobile-bar{position:fixed;z-index:1000;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;background:#020b19f8;border-top:1px solid #22c7e9;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+ .nexus-mobile-bar button{padding:8px 4px;font-size:12px;min-height:46px;border-radius:8px;font-weight:600}
+ .nexus-mobile-bar button.active{border-color:#ff981f;color:#ffcb91;background:#092a47}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -153,8 +152,8 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
 <body>
 <header>
   <div class="logo">
-    <div class="logo-icon"><img alt="JARVIS-AI logo" height="64" src="/jarvis-nexus-logo.png" width="64"/></div>
-    <div><h1>JARVIS-AI</h1><small>NEXUS v4.5</small></div>
+    <div class="logo-icon"><img alt="JARVIS-AI logo" height="54" src="/jarvis-nexus-logo.png" width="54"/></div>
+    <div><h1>JARVIS-AI</h1><small>NEXUS v4.6 · MOBILE READY</small></div>
   </div>
   <span class="brand-subtitle">Your AI Personal Assistant</span>
   <span class="header-tag">☁ Cloud ready</span>
@@ -163,9 +162,8 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
 </header>
 
 <nav aria-label="Mobile navigation" class="nexus-mobile-bar">
-  <button data-go="home" type="button">⌂ Home</button>
-  <button data-go="chat" type="button">▣ Chat</button>
-  <button data-go="voiceDock" type="button">🎙 Voice</button>
+  <button class="active" data-go="voiceDock" type="button">🎙 Voice &amp; AI</button>
+  <button data-go="quickActionsPanel" type="button">⚡ Apps</button>
   <button data-go="taskpanel" type="button">☑ Tasks</button>
   <button data-go="googlePanel" type="button">✉ Mail</button>
 </nav>
@@ -174,17 +172,15 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
   <aside class="sidebar">
     <section class="panel">
       <button class="navbtn active" data-go="home">⌂ Command Center</button>
-      <button class="navbtn" data-go="chat">▣ AI Chat</button>
       <button class="navbtn" data-go="voiceDock">♩ Voice Mode</button>
+      <button class="navbtn" data-go="chat">▣ AI Chat</button>
+      <button class="navbtn" data-go="quickActionsPanel">⚡ Quick Apps</button>
       <button class="navbtn" data-go="researchPanel">◎ Web &amp; Research</button>
-      <button class="navbtn" data-go="desktop">▦ Apps &amp; Desktop</button>
       <button class="navbtn" data-go="files">▱ Files &amp; Workspace</button>
       <button class="navbtn" data-go="taskpanel">☑ Tasks &amp; Projects</button>
       <button class="navbtn" data-go="reminderPanel">◷ Reminders &amp; Schedule</button>
       <button class="navbtn" data-go="googlePanel">✉ Gmail &amp; Contacts</button>
       <button class="navbtn" data-go="auditpanel">⚙ Activity Logs</button>
-      <button class="navbtn planned-nav" disabled="disabled" title="Requires integration" type="button">♧ Calling</button>
-      <button class="navbtn planned-nav" disabled="disabled" title="Requires integration" type="button">⚡ Automation</button>
     </section>
     <section class="panel">
       <h2>JARVIS Status</h2>
@@ -192,13 +188,12 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
       <div class="statrow"><span>AI model</span><span id="aiState">Checking</span></div>
       <div class="statrow"><span>Voice engine</span><span>Fast Neural</span></div>
       <div class="statrow"><span>Google sync</span><span id="googleState">Check</span></div>
-      <p class="security">Status reflects actual configuration, not simulated percentages.</p>
+      <p class="security">Status reflects actual configuration.</p>
     </section>
   </aside>
 
   <main id="home">
-    <div class="jarvis-build-stamp">BUILD: NEXUS v4.5 · FULL PUNJABI SENTENCE &amp; SPEECH</div>
-    <button class="nexus-install hidden" id="installPwaBtn" type="button">📲 Install JARVIS App</button>
+    <button class="nexus-install hidden" id="installPwaBtn" type="button">📲 Install JARVIS App on Phone</button>
 
     <section class="panel hero">
       <div class="hero-art">
@@ -206,79 +201,27 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
         <span class="sr-only" id="voiceStatus">VOICE READY</span>
         <div aria-hidden="true" class="core-wrap"></div>
       </div>
-      <div class="hero-caption">✦ VOICE • VISION • SEARCH • AUTOMATE • CONTACTS • MAIL</div>
-      <div class="actionbar">
-        <button data-command="Jarvis open YouTube" type="button">▶ YouTube</button>
-        <button data-command="Jarvis open Google" type="button">🌐 Google</button>
-        <button data-command="Jarvis search Google for AI tools" type="button">◎ Web Search</button>
-        <button data-go="files" type="button">▤ Files</button>
-        <button data-go="desktop" type="button">▦ Apps</button>
-        <button data-go="googlePanel" type="button">✉ Gmail</button>
-        <button id="mobileShareBtn" type="button">📤 Share</button>
-        <button data-go="reminderPanel" type="button">▣ Reminders</button>
-        <button data-go="aiToolsPanel" type="button">✦ AI Tools</button>
-        <button data-go="chat" type="button">••• More</button>
-      </div>
-    </section>
-
-    <section class="panel" id="aiToolsPanel">
-      <h2>✦ AI TOOLS</h2>
-      <div class="quick">
-        <button type="button" data-go="chat">AI Chat</button>
-        <button type="button" data-go="researchPanel">Research</button>
-        <button type="button" id="aiDoc">Create document</button>
-        <button type="button" id="aiMath">Calculator</button>
-      </div>
-      <small>Choose a tool; AI chat uses your configured Gemini/OpenAI model.</small>
-    </section>
-
-    <section class="panel console" id="chat">
-      <h2>◈ LIVE COMMAND TRANSCRIPT</h2>
-      <div aria-live="polite" class="log" id="log"></div>
-      <div class="bar">
-        <input id="message" maxlength="4000" placeholder="Ask JARVIS — Sat Sri Akal ji, bhajan play karo, trending song play karo..."/>
-        <button class="primary" id="send">➤ SEND</button>
-      </div>
-      <div class="quick">
-        <button id="bhajanBtn" type="button">🙏 Bhajan</button>
-        <button data-command="Jarvis play trending song in YouTube" type="button">🎵 Trending Song</button>
-        <button data-command="Jarvis search Google for Python tutorials" type="button">Google search</button>
-        <button id="quickCalc" type="button">🧮 Calculator</button>
-      </div>
-      <div class="bar">
-        <button id="unlock" type="button">🔑 Set access token</button>
-        <button id="speak" type="button">🔊 Voice on/off</button>
-      </div>
-      <div class="bar jarvis-doc-tools">
-        <button id="createPdf" title="Generate a new PDF document about any topic" type="button">📄 Create PDF</button>
-        <button id="createWord" title="Generate a new Word document about any topic" type="button">📝 Create Word</button>
-        <button id="exportPdf" title="Save the visible conversation as PDF" type="button">📄 Export PDF</button>
-        <button id="exportWord" title="Download the visible conversation as a Word-compatible document" type="button">📝 Export Word</button>
-      </div>
+      <div class="hero-caption">✦ VOICE • AI CHAT • SEARCH • MAIL • CONTACTS • DOCS</div>
     </section>
 
     <section class="panel reference-voice" id="voiceDock">
       <div class="voice-dock">
         <div>
-          <h2>◈ VOICE COMMAND CENTER</h2>
-          <div class="voice-status">Fast hands-free voice mode. Select Punjabi (pa-IN) or Hindi (hi-IN) when speaking in those languages.</div>
+          <h2>◈ 1. TAP TO SPEAK (VOICE ASSISTANT)</h2>
+          <div class="voice-status" id="voiceHint">Choose language &amp; tap Start Listening to talk hands-free.</div>
         </div>
         <div class="mic-cluster">
-          <div class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <button class="primary" id="mic" title="Start voice recognition" type="button">🎙 START LISTENING</button>
-          <div class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         </div>
-        <button id="conversationToggle" title="Opt in to continuous conversation" type="button">🔁 Conversation ON</button>
-        <button id="stopVoice" title="Stop JARVIS speaking" type="button">⏹ STOP VOICE</button>
-        <button id="testMic" title="Check microphone signal" type="button">🎚 TEST MIC</button>
-        <button id="checkVoices" title="List available speaking languages on this device" type="button">🗣 CHECK VOICES</button>
         <select aria-label="Conversation language" id="voiceLang">
           <option value="auto">Auto · English / Hinglish</option>
+          <option value="pa-IN">ਪੰਜਾਬੀ · Gurmukhi</option>
+          <option value="hi-IN">हिन्दी · Hindi</option>
           <option value="en-IN">English · India</option>
           <option value="en-US">English · US</option>
           <option value="en-GB">English · UK</option>
-          <option value="hi-IN">हिन्दी · Hindi</option>
-          <option value="pa-IN">ਪੰਜਾਬੀ · Gurmukhi</option>
           <option value="pa-Latn-IN">Punjabi · Roman (Latin)</option>
           <option value="bn-IN">বাংলা · Bengali</option>
           <option value="ta-IN">தமிழ் · Tamil</option>
@@ -295,24 +238,51 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
           <option value="it-IT">Italiano · Italian</option>
           <option value="ru-RU">Русский · Russian</option>
         </select>
+        <button id="conversationToggle" title="Opt in to continuous conversation" type="button">🔁 Auto-Listen ON</button>
+        <button id="stopVoice" title="Stop JARVIS speaking" type="button">⏹ STOP</button>
       </div>
-      <p class="footnote">Microphone requires browser permission. Punjabi uses bolchal pronunciation via Indian Neural TTS.</p>
+    </section>
+
+    <section class="panel console" id="chat">
+      <h2>◈ 2. AI CHAT &amp; LIVE TRANSCRIPT</h2>
+      <div aria-live="polite" class="log" id="log"></div>
+      <div class="bar">
+        <input id="message" maxlength="4000" placeholder="Type or speak: Sat Sri Akal, search AI news, play bhajan..."/>
+        <button class="primary" id="send">➤ SEND</button>
+      </div>
+      <div class="bar">
+        <button id="unlock" type="button">🔑 Set Access Token</button>
+        <button id="speak" type="button">🔊 Voice ON/OFF</button>
+      </div>
+      <div class="jarvis-doc-tools">
+        <button id="createPdf" type="button">📄 Create PDF</button>
+        <button id="createWord" type="button">📝 Create Word</button>
+        <button id="exportPdf" type="button">📄 Export Chat PDF</button>
+        <button id="exportWord" type="button">📝 Export Chat Word</button>
+      </div>
+    </section>
+
+    <section class="panel" id="quickActionsPanel">
+      <h2>◈ 3. QUICK APPS &amp; WEB ACTIONS</h2>
+      <div class="actionbar">
+        <button data-web="https://www.youtube.com/" data-label="YouTube" type="button"><span class="action-icon" aria-hidden="true">▶</span>YouTube</button>
+        <button data-web="https://www.google.com/" data-label="Google" type="button"><span class="action-icon" aria-hidden="true">🌐</span>Google</button>
+        <button id="mobileSearchBtn" type="button"><span class="action-icon" aria-hidden="true">🔎</span>Web Search</button>
+        <button id="bhajanBtn" type="button"><span class="action-icon" aria-hidden="true">🙏</span>Play Bhajan</button>
+        <button id="mobileGmailBtn" type="button"><span class="action-icon" aria-hidden="true">✉</span>Gmail</button>
+        <button id="mobileContactsBtn" type="button"><span class="action-icon" aria-hidden="true">👤</span>Contacts</button>
+        <button id="mobileCalcBtn" type="button"><span class="action-icon" aria-hidden="true">🧮</span>Calculator</button>
+        <button data-go="files" type="button"><span class="action-icon" aria-hidden="true">📁</span>Notes &amp; Files</button>
+      </div>
+      <div class="quick">
+        <button id="testMic" type="button">🎚 Test Mic</button>
+        <button id="checkVoices" type="button">🗣 Check Voices</button>
+        <button id="mobileShareBtn" type="button">📤 Share App</button>
+      </div>
     </section>
   </main>
 
   <aside class="right">
-    <section class="panel" id="rightNav">
-      <h2>◈ QUICK NAVIGATION</h2>
-      <div class="quicklinks jarvis-right-nav">
-        <button type="button" data-go="chat">▣ AI Chat</button>
-        <button type="button" data-go="voiceDock">🎙 Voice</button>
-        <button type="button" data-go="taskpanel">☑ Tasks</button>
-        <button type="button" data-go="reminderPanel">◷ Reminders</button>
-        <button type="button" data-go="googlePanel">✉ Mail/Contacts</button>
-        <button type="button" data-go="auditpanel">⚙ Activity</button>
-      </div>
-    </section>
-
     <section class="panel">
       <h2>◈ Today's Overview</h2>
       <div class="summary">
@@ -326,13 +296,14 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
       <h2>◈ Gmail &amp; Contacts</h2>
       <div class="bar">
         <button id="connectGoogle" type="button">🔗 Connect Google</button>
-        <button id="fetchEmails" type="button">✉ Inbox</button>
+        <button id="fetchEmails" type="button">✉ Read Inbox</button>
+        <button data-web="https://mail.google.com/" data-label="Gmail Web" type="button">🌐 Open Gmail</button>
       </div>
       <div class="bar">
         <input id="contactQuery" placeholder="Search contact name/email"/>
         <button id="fetchContacts" type="button">👤 Contacts</button>
       </div>
-      <div class="scrollbox muted" id="googleOutput">Connect Google OAuth on server to read Gmail &amp; Contacts.</div>
+      <div class="scrollbox muted" id="googleOutput">Tap Open Gmail for web mail, or Connect Google to sync inbox &amp; contacts here.</div>
     </section>
 
     <section class="panel" id="taskpanel">
@@ -343,7 +314,7 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
 
     <section class="panel media-panel">
       <h2>▶ JARVIS Media Player</h2>
-      <p class="media-placeholder" id="mediaInfo">Say “Jarvis play Japji Sahib path in YouTube” or tap Bhajan / Trending Song.</p>
+      <p class="media-placeholder" id="mediaInfo">Say “Jarvis play Japji Sahib path in YouTube” or tap Play Bhajan.</p>
     </section>
 
     <section class="panel" id="reminderPanel">
@@ -351,28 +322,6 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
       <input id="remindTitle" placeholder="Reminder title"/>
       <div class="bar"><input id="due" type="datetime-local"/><button id="remind" type="button">🔔 Schedule</button></div>
       <div class="scrollbox muted" id="reminders"></div>
-      <small>Checked only while this dashboard is open.</small>
-    </section>
-
-    <section class="panel" id="desktop">
-      <h2>◈ Desktop Controls</h2>
-      <div class="quicklinks">
-        <button data-app="notepad" type="button">📝 Notepad</button>
-        <button data-app="calculator" type="button">🧮 Calculator</button>
-        <button data-app="paint" type="button">🎨 Paint</button>
-        <button data-app="explorer" type="button">📁 Explorer</button>
-        <button data-command="Jarvis open Gmail" type="button">✉️ Gmail</button>
-      </div>
-      <small>Localhost only; requires confirmation.</small>
-    </section>
-
-    <section class="panel">
-      <h2>◈ Quick Web Actions</h2>
-      <div class="quicklinks">
-        <button data-command="Jarvis open YouTube" type="button">▶ YouTube</button>
-        <button data-command="Jarvis open Google" type="button">◎ Google</button>
-        <button data-command="Jarvis search Google for Wikipedia" type="button">◉ Search</button>
-      </div>
     </section>
 
     <section class="panel" id="researchPanel">
@@ -382,11 +331,22 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
     </section>
 
     <section class="panel" id="files">
-      <h2>◈ Secure Workspace</h2>
+      <h2>◈ Secure Notes &amp; Workspace</h2>
       <input id="filename" placeholder="notes/today.txt"/>
-      <textarea id="filecontent" placeholder="Write text here..."></textarea>
-      <div class="bar"><button id="saveFile" type="button">💾 Save</button><button id="readFile" type="button">📖 Read</button><button id="listFiles" type="button">📁 List files</button></div>
+      <textarea id="filecontent" placeholder="Write notes here..."></textarea>
+      <div class="bar"><button id="saveFile" type="button">💾 Save</button><button id="readFile" type="button">📖 Read</button><button id="listFiles" type="button">📁 List</button></div>
       <div class="scrollbox muted" id="filelist"></div>
+    </section>
+
+    <section class="panel" id="desktopPanel">
+      <h2>◈ Windows Desktop Apps</h2>
+      <div class="quicklinks">
+        <button data-app="notepad" type="button">📝 Notepad</button>
+        <button data-app="calculator" type="button">🧮 Calc</button>
+        <button data-app="paint" type="button">🎨 Paint</button>
+        <button data-app="explorer" type="button">📁 Explorer</button>
+      </div>
+      <small>Works only when running locally on Windows.</small>
     </section>
 
     <section class="panel" id="auditpanel">
@@ -397,21 +357,7 @@ header small{letter-spacing:1px;font-size:13px;color:#00dcff;font-weight:800;dis
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".actionbar button").forEach(btn => {
-    const raw = btn.textContent.trim();
-    const m = raw.match(/^([^\w\s]+|[\p{Extended_Pictographic}])\s+(.+)$/u);
-    if (!m) return;
-    const icon = document.createElement("span");
-    icon.className = "action-icon";
-    icon.setAttribute("aria-hidden", "true");
-    icon.textContent = m[1];
-    btn.textContent = m[2];
-    btn.prepend(icon);
-  });
-});
-
-let token = sessionStorage.getItem("jarvis_token") || "";
+let token = sessionStorage.getItem("jarvis_token") || localStorage.getItem("jarvis_token") || "";
 let voice = true;
 const $ = id => document.getElementById(id);
 
@@ -433,6 +379,24 @@ function show(msg, who = "JARVIS") {
   e.append(b, document.createTextNode(cleanMsg));
   $("log").append(e);
   $("log").scrollTop = $("log").scrollHeight;
+}
+
+function openExternalSmart(url, label) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.textContent = "↗ Open " + label;
+  $("log").append(a);
+  $("log").scrollTop = $("log").scrollHeight;
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  if (isMobile || isStandalone) {
+    window.location.assign(url);
+    return;
+  }
+  const tab = window.open(url, "_blank", "noopener,noreferrer");
+  if (!tab) window.location.assign(url);
 }
 
 async function api(path, method = "GET", body) {
@@ -457,17 +421,19 @@ async function run(fn) {
 }
 
 async function setToken() {
-  const next = prompt("Enter your JARVIS GLOBAL access token (at least 32 characters):", "");
+  const next = prompt("Enter your JARVIS access token (at least 32 characters):", token);
   if (next === null) return;
   token = next.trim();
   try {
     await api("/api/tasks");
     sessionStorage.setItem("jarvis_token", token);
-    show("🔓 Access verified. Protected actions are unlocked.");
+    localStorage.setItem("jarvis_token", token);
+    show("🔓 Access verified! JARVIS is unlocked.");
     await refresh();
   } catch (e) {
     token = "";
     sessionStorage.removeItem("jarvis_token");
+    localStorage.removeItem("jarvis_token");
     show("🔒 Token rejected: " + e.message);
   }
 }
@@ -481,6 +447,7 @@ let continuousMode = true;
 let activeRecognition = null;
 let neuralAudio = null;
 let neuralController = null;
+let networkRetryCount = 0;
 
 function isSpeakingOrBusy() {
   return Boolean(
@@ -492,7 +459,7 @@ function isSpeakingOrBusy() {
   );
 }
 
-function queueRelisten(delay = 250) {
+function queueRelisten(delay = 300) {
   clearTimeout(relistenTimer);
   if (!continuousMode || !conversationMode || document.hidden) return;
   relistenTimer = setTimeout(() => {
@@ -590,14 +557,14 @@ function stopSpeech() {
 
 function browserSpeechFallback(cleaned, lang, generation) {
   if (!("speechSynthesis" in window)) {
-    $("voiceStatus").textContent = "TEXT READY · VOICE UNAVAILABLE";
+    $("voiceStatus").textContent = "TEXT READY";
     queueRelisten();
     return;
   }
   const effectiveLang = lang === "pa-IN" && !chooseSpeechVoice("pa-IN") ? "hi-IN" : lang;
   const selected = chooseSpeechVoice(effectiveLang);
   if (!selected) {
-    $("voiceStatus").textContent = "TEXT READY · NO " + lang + " VOICE";
+    $("voiceStatus").textContent = "TEXT READY";
     queueRelisten();
     return;
   }
@@ -619,10 +586,9 @@ function browserSpeechFallback(cleaned, lang, generation) {
     u.onerror = () => {
       if (failed) return;
       failed = true;
-      $("voiceStatus").textContent = "TEXT READY · VOICE UNAVAILABLE";
+      $("voiceStatus").textContent = "TEXT READY";
       queueRelisten();
     };
-    $("voiceStatus").textContent = "SYSTEM VOICE · " + effectiveLang;
     speechSynthesis.speak(u);
   }
   next();
@@ -676,7 +642,7 @@ async function say(text, speakOverride = null) {
   controller = new AbortController();
   neuralController = controller;
   try {
-    $("voiceStatus").textContent = "SPEAKING · " + lang;
+    $("voiceHint").textContent = "JARVIS speaking...";
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: { "X-Jarvis-Token": token, "Content-Type": "application/json" },
@@ -684,7 +650,6 @@ async function say(text, speakOverride = null) {
       signal: controller.signal,
     });
     if (!response.ok) throw Error("Neural voice unavailable");
-    const fallbackVoice = response.headers.get("X-Jarvis-TTS-Fallback");
     const blob = await response.blob();
     if (generation !== speechGeneration) return;
     if (!blob.size || !blob.type.toLowerCase().includes("audio/mpeg")) throw Error("Unsupported neural audio");
@@ -696,16 +661,13 @@ async function say(text, speakOverride = null) {
       finished = true;
       release();
       if (generation === speechGeneration) {
-        $("voiceStatus").textContent = "VOICE READY";
-        queueRelisten(250);
+        $("voiceHint").textContent = "Tap Start Listening to speak.";
+        queueRelisten(300);
       }
     };
     audio.onerror = () => fallbackOnce();
     audio.src = url;
     await audio.play();
-    if (generation === speechGeneration && !fallbackUsed) {
-      $("voiceStatus").textContent = fallbackVoice === "hi-IN" ? "JARVIS SPEAKING · Punjabi (Bolchal Neural)" : "JARVIS SPEAKING · " + lang;
-    }
   } catch (err) {
     if (generation !== speechGeneration || err.name === "AbortError") {
       release();
@@ -717,8 +679,8 @@ async function say(text, speakOverride = null) {
 
 $("conversationToggle").onclick = () => {
   continuousMode = !continuousMode;
-  $("conversationToggle").textContent = continuousMode ? "🔁 Conversation ON" : "🔁 Conversation OFF";
-  show(continuousMode ? "Continuous conversation enabled." : "Continuous conversation disabled.");
+  $("conversationToggle").textContent = continuousMode ? "🔁 Auto-Listen ON" : "🔁 Auto-Listen OFF";
+  show(continuousMode ? "Auto-listen enabled." : "Auto-listen disabled.");
   if (!continuousMode) {
     conversationMode = false;
     clearTimeout(relistenTimer);
@@ -733,13 +695,13 @@ $("stopVoice").onclick = () => {
     activeRecognition = null;
   }
   stopSpeech();
-  $("voiceStatus").textContent = "VOICE STOPPED";
+  $("voiceHint").textContent = "Stopped.";
   setListening(false);
 };
 $("speak").onclick = () => {
   voice = !voice;
   if (!voice) stopSpeech();
-  show("Voice output " + (voice ? "enabled" : "disabled"));
+  show("Voice output " + (voice ? "ON" : "OFF"));
 };
 
 const BHAJAN_ROTATION = [
@@ -755,6 +717,39 @@ $("bhajanBtn").onclick = () => {
   bhajanIndex++;
   $("message").value = "Jarvis play " + chosen + " in YouTube";
   send(false);
+};
+
+document.querySelectorAll("[data-web]").forEach(btn => {
+  btn.onclick = () => openExternalSmart(btn.dataset.web, btn.dataset.label || "Link");
+});
+
+$("mobileSearchBtn").onclick = () => {
+  const q = prompt("What do you want to search on Google?", "");
+  if (q && q.trim()) {
+    openExternalSmart("https://www.google.com/search?q=" + encodeURIComponent(q.trim()), "Google: " + q.trim());
+  }
+};
+
+$("mobileGmailBtn").onclick = () => {
+  openExternalSmart("https://mail.google.com/", "Gmail");
+};
+
+$("mobileContactsBtn").onclick = () => {
+  const panel = $("googlePanel");
+  if (panel) panel.scrollIntoView({ behavior: "smooth" });
+  if (token) {
+    $("fetchContacts").click();
+  } else {
+    openExternalSmart("https://contacts.google.com/", "Google Contacts");
+  }
+};
+
+$("mobileCalcBtn").onclick = () => {
+  const expr = prompt("Enter calculation (e.g. 245 * 18):", "");
+  if (expr && expr.trim()) {
+    $("message").value = "calculate " + expr.trim();
+    send(false);
+  }
 };
 
 function normalizeVoiceCommand(raw) {
@@ -776,7 +771,7 @@ function browserIntent(message) {
   const google = /google|गूगल/i;
 
   if (/(?:gmail|जीमेल|email|ईमेल)/i.test(low) && /(?:open|kholo|khol|खोलो|ओपन)/i.test(low)) {
-    return { url: "https://mail.google.com/mail/u/0/#inbox", label: "Gmail" };
+    return { url: "https://mail.google.com/", label: "Gmail" };
   }
   const opening = /(?:open|launch|kholo|khol|khol do|karo|kro|खोलो|खोल दो|ओपन)/i;
   const search = /(?:search|find|lookup|dhundo|dhundho|खोजो|ढूंढो|ढूँढो|सर्च)/i;
@@ -821,8 +816,7 @@ function browserIntent(message) {
 async function requestVideoPlayback(intent) {
   const q = intent.query;
   if (!token) {
-    show("Set access token first for direct video lookup. Opening YouTube search...");
-    openSafeBrowserAction({ ...intent, playRequested: false });
+    openExternalSmart(intent.url, intent.label);
     return;
   }
   show("Finding on YouTube: " + q);
@@ -831,42 +825,10 @@ async function requestVideoPlayback(intent) {
     const result = await api("/api/video/lookup", "POST", { query: q });
     if (!/^[A-Za-z0-9_-]{11}$/.test(result.id)) throw Error("Invalid video ID");
     const watch = "https://www.youtube.com/watch?v=" + encodeURIComponent(result.id);
-    const link = document.createElement("a");
-    link.href = watch;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.textContent = "▶ Play on YouTube: " + result.title;
-    $("log").append(link);
-    $("log").scrollTop = $("log").scrollHeight;
-    if ($("mediaInfo")) $("mediaInfo").innerHTML = "";
-    const mediaLink = document.createElement("a");
-    mediaLink.href = watch;
-    mediaLink.target = "_blank";
-    mediaLink.rel = "noopener noreferrer";
-    mediaLink.textContent = "▶ " + result.title;
-    if ($("mediaInfo")) $("mediaInfo").append(mediaLink);
-    const tab = window.open(watch, "_blank", "noopener,noreferrer");
-    show("Opened YouTube watch page for: " + result.title + (tab ? "" : " (tap the link above if pop-up was blocked)."));
+    if ($("mediaInfo")) $("mediaInfo").textContent = "▶ " + result.title;
+    openExternalSmart(watch, result.title);
   } catch (e) {
-    show("Direct video lookup fallback: " + e.message);
-    openSafeBrowserAction({ ...intent, playRequested: false });
-  }
-}
-
-function openSafeBrowserAction(intent) {
-  const a = document.createElement("a");
-  a.href = intent.url;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
-  a.textContent = "Open " + intent.label;
-  $("log").append(a);
-  $("log").scrollTop = $("log").scrollHeight;
-  try {
-    const tab = window.open(intent.url, "_blank", "noopener,noreferrer");
-    show(tab ? "Opened " + intent.label : "Tap the link above to open " + intent.label);
-    if (!intent.playRequested) say("Opening " + intent.label);
-  } catch (e) {
-    show("Tap the link above to open " + intent.label);
+    openExternalSmart(intent.url, intent.label);
   }
 }
 
@@ -895,9 +857,8 @@ async function send(fromVoice = false) {
       if (intent.playRequested) {
         await requestVideoPlayback(intent);
       } else {
-        openSafeBrowserAction(intent);
+        openExternalSmart(intent.url, intent.label);
       }
-      show("Routed in " + Math.round(performance.now() - started) + " ms.");
       return;
     }
     const callMatch = m.toLowerCase().replace(/^(?:hey[ ,]*)?jarvis[,: ]*/i, "").match(/^(?:connect a )?(?:call|phone|dial)\s+(?:to\s+)?(.+)$/i);
@@ -908,21 +869,21 @@ async function send(fromVoice = false) {
         if (res.contacts && res.contacts.length) {
           const c = res.contacts[0];
           const info = c.name + (c.phone ? " · " + c.phone : "") + (c.email ? " · " + c.email : "");
-          show("Found contact: " + info + " (Direct calling isn't supported from browser; tap phone link on mobile to dial).");
+          show("Found contact: " + info);
           if (c.phone) {
             const a = document.createElement("a");
             a.href = "tel:" + c.phone.replace(/[^+\d]/g, "");
             a.textContent = "📞 Dial " + c.name + " (" + c.phone + ")";
             $("log").append(a);
           }
-          if (voice) await say("Found " + c.name + " in your contacts. Direct calling is not enabled here.");
+          if (voice) await say("Found " + c.name + " in your contacts.");
         } else {
-          const msg = "Direct phone calling is not supported here, and no contact named " + targetName + " was found.";
+          const msg = "No contact named " + targetName + " found in synced Google Contacts.";
           show(msg);
           if (voice) await say(msg);
         }
       } catch (err) {
-        const msg = "Direct calling is not supported here. Connect Google Contacts first to search " + targetName + ".";
+        const msg = "Connect Google Contacts first to look up " + targetName + ".";
         show(msg);
         if (voice) await say(msg);
       }
@@ -939,17 +900,10 @@ async function send(fromVoice = false) {
     if (voice) await say(r.reply, r.speak_text);
     if (r.mode === "tasks") refreshTasks().catch(() => {});
   } catch (e) {
-    const langVal = $("voiceLang").value;
-    const retryMsg = langVal === "pa-IN"
-      ? "ਮਾਫ਼ ਕਰਨਾ, ਕਨੈਕਸ਼ਨ ਵਿੱਚ ਥੋੜ੍ਹੀ ਦਿੱਕਤ ਆਈ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਬੋਲੋ।"
-      : (langVal === "hi-IN"
-        ? "माफ़ कीजिए, कनेक्शन में थोड़ी दिक्कत आई है। कृपया दोबारा बोलिए।"
-        : "Sorry, there was a quick connection hiccup. Please try again.");
     show("Error: " + e.message);
-    if (fromVoice) await say(retryMsg);
   } finally {
     voiceBusy = false;
-    if (fromVoice && !isSpeakingOrBusy()) queueRelisten(250);
+    if (fromVoice && !isSpeakingOrBusy()) queueRelisten(300);
   }
 }
 
@@ -971,7 +925,7 @@ $("exportWord").onclick = () => {
   if (!text.trim()) { show("No conversation to export yet."); return; }
   const html = "<!doctype html><html><head><meta charset='utf-8'></head><body><h1>JARVIS Conversation</h1><pre style='white-space:pre-wrap;font-family:Arial,sans-serif'>" + text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</pre></body></html>";
   safeDownload(new Blob(["\ufeff", html], { type: "application/msword" }), "JARVIS-conversation.doc");
-  show("Word-compatible conversation document downloaded.");
+  show("Word document downloaded.");
 };
 $("exportPdf").onclick = () => {
   const text = conversationText();
@@ -983,7 +937,6 @@ $("exportPdf").onclick = () => {
   w.document.querySelector("pre").textContent = text;
   w.focus();
   setTimeout(() => w.print(), 250);
-  show("Print dialog opened. Choose Save as PDF.");
 };
 
 function safeDocumentName(topic, ext) {
@@ -996,12 +949,10 @@ async function createDocument(kind, topic) {
   const title = topic.replace(/^(?:jarvis[, ]*)?(?:create|generate|make)\s+(?:a\s+)?(?:professional\s+)?(?:pdf|word)\s+(?:report|document)?\s*(?:on|about|for|of)?\s*/i, "").trim() || topic;
   show("Creating " + kind.toUpperCase() + " for: " + title);
   try {
-    const instruction = "[DOCUMENT REQUEST] Write a clear, structured document with # Introduction, ## headings, short paragraphs, and - bullet points. Include a conclusion. Respond in the selected language. Topic: " + title;
-    const r = await api("/api/chat", "POST", { message: instruction, voice_mode: false, language: $("voiceLang").value });
     const response = await fetch("/api/document", {
       method: "POST",
       headers: { "X-Jarvis-Token": token, "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content: r.reply, format: kind === "pdf" ? "pdf" : "docx" }),
+      body: JSON.stringify({ title, content: title, format: kind === "pdf" ? "pdf" : "docx" }),
     });
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -1024,7 +975,7 @@ $("message").onkeydown = e => { if (e.key === "Enter") send(false); };
 function setListening(on) {
   $("mic").setAttribute("aria-pressed", String(on));
   $("mic").textContent = on ? "⏹ STOP LISTENING" : "🎙 START LISTENING";
-  $("voiceStatus").textContent = on ? "● LISTENING — SPEAK FULL SENTENCE" : "VOICE READY · CLICK MICROPHONE";
+  $("voiceHint").textContent = on ? "Listening... speak clearly now." : "Tap Start Listening to speak.";
   document.querySelector(".core-wrap").classList.toggle("listening", on);
 }
 
@@ -1034,13 +985,13 @@ function startVoiceRecognition() {
   if (!R) {
     conversationMode = false;
     setListening(false);
-    show("Error: Speech recognition unsupported. Try Chrome or Edge.");
+    show("Voice recognition is not supported in this browser. Try Chrome.");
     return;
   }
   if (!window.isSecureContext) {
     conversationMode = false;
     setListening(false);
-    show("Error: Microphone requires HTTPS or localhost.");
+    show("Microphone requires HTTPS.");
     return;
   }
 
@@ -1064,8 +1015,11 @@ function startVoiceRecognition() {
   rec.continuous = false;
   rec.maxAlternatives = 1;
 
-  rec.onstart = () => setListening(true);
+  rec.onstart = () => {
+    setListening(true);
+  };
   rec.onresult = e => {
+    networkRetryCount = 0;
     const results = Array.from(e.results);
     const final = cleanTranscript(results.filter(r => r.isFinal).map(r => r[0].transcript).join(" "));
     const interim = cleanTranscript(results.filter(r => !r.isFinal).map(r => r[0].transcript).join(" "));
@@ -1091,15 +1045,18 @@ function startVoiceRecognition() {
     clearTimeout(endpointTimer);
     if (e.error === "aborted") { wasAborted = true; return; }
     hadError = true;
-    const hints = {
-      "not-allowed": "Microphone permission denied.",
-      "service-not-allowed": "Speech recognition service blocked.",
-      "no-speech": "No speech heard. Try speaking closer or choosing your language.",
-      "audio-capture": "No microphone detected.",
-      "network": "Speech recognition network error.",
-    };
-    if (e.error !== "no-speech") show("Error: Voice recognition failed (" + e.error + "). " + (hints[e.error] || ""));
-    if (["not-allowed", "service-not-allowed", "audio-capture", "network"].includes(e.error)) {
+    if (e.error === "network") {
+      networkRetryCount++;
+      if (networkRetryCount > 2) {
+        conversationMode = false;
+        show("Voice recognition paused due to unstable mobile network. Tap Start Listening to retry.");
+      }
+      return;
+    }
+    if (e.error !== "no-speech") {
+      show("Mic notice (" + e.error + ").");
+    }
+    if (["not-allowed", "service-not-allowed", "audio-capture"].includes(e.error)) {
       conversationMode = false;
     }
   };
@@ -1112,7 +1069,7 @@ function startVoiceRecognition() {
     if (!hadError && transcript) {
       if (isLikelyMisheardWakeWord(transcript)) {
         $("message").value = "";
-        queueRelisten(200);
+        queueRelisten(250);
         return;
       }
       $("message").value = transcript;
@@ -1121,7 +1078,7 @@ function startVoiceRecognition() {
       send(true);
     } else {
       if (!continuousMode) conversationMode = false;
-      queueRelisten(250);
+      queueRelisten(450);
     }
   };
 
@@ -1131,7 +1088,7 @@ function startVoiceRecognition() {
     activeRecognition = null;
     setListening(false);
     conversationMode = false;
-    show("Error: Cannot start microphone — " + e.message);
+    show("Cannot start microphone: " + e.message);
   }
 }
 
@@ -1145,9 +1102,9 @@ $("mic").onclick = () => {
       activeRecognition = null;
     }
     setListening(false);
-    show("Hands-free conversation paused.");
     return;
   }
+  networkRetryCount = 0;
   stopSpeech();
   voiceBusy = false;
   conversationMode = true;
@@ -1162,7 +1119,7 @@ document.addEventListener("visibilitychange", () => {
       activeRecognition = null;
     }
   } else {
-    queueRelisten(250);
+    queueRelisten(300);
   }
 });
 
@@ -1189,57 +1146,21 @@ $("voiceLang").addEventListener("change", () => {
 $("checkVoices").onclick = () => {
   const voices = speechSynthesis.getVoices();
   const langs = [...new Set(voices.map(v => v.lang))].sort();
-  show(voices.length ? "Browser voices (" + voices.length + "): " + langs.join(", ") + " · Punjabi & Hindi use Bolchal Neural TTS." : "Neural TTS ready via /api/tts.");
+  show(voices.length ? "Device voices (" + voices.length + "): " + langs.join(", ") : "Neural TTS ready.");
 };
 
 $("testMic").onclick = async () => {
-  if (!navigator.mediaDevices?.getUserMedia) { show("Mic diagnostic unavailable in this browser."); return; }
+  if (!navigator.mediaDevices?.getUserMedia) { show("Mic test unavailable."); return; }
   let stream;
   try {
     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const source = ctx.createMediaStreamSource(stream);
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 1024;
-    source.connect(analyser);
-    const data = new Uint8Array(analyser.fftSize);
-    let peak = 0;
-    show("🎚 Microphone permission granted. Speak for 2.5 seconds...");
-    const start = performance.now();
-    await new Promise(resolve => {
-      function sample() {
-        analyser.getByteTimeDomainData(data);
-        const energy = Math.sqrt(data.reduce((a, x) => a + ((x - 128) / 128) ** 2, 0) / data.length);
-        peak = Math.max(peak, energy);
-        if (performance.now() - start < 2500) requestAnimationFrame(sample);
-        else resolve();
-      }
-      sample();
-    });
-    show(peak > 0.012 ? "🎚 Microphone signal detected clearly." : "🎚 Very low signal. Check mic input device or mute.");
-    await ctx.close();
+    show("🎚 Microphone is working!");
   } catch (e) {
     show("Mic test failed: " + e.message);
   } finally {
     stream?.getTracks().forEach(t => t.stop());
   }
 };
-
-function openCalculatorTool() {
-  const value = prompt("Enter a calculation (e.g. 125*48):", "");
-  if (value === null || !value.trim()) return;
-  $("message").value = "calculate " + value.trim();
-  send(false);
-}
-$("quickCalc").onclick = () => launchApp("calculator");
-$("aiMath").onclick = openCalculatorTool;
-$("aiDoc").onclick = () => $("createPdf").click();
-document.querySelectorAll("[data-command]").forEach(b => {
-  b.onclick = () => {
-    $("message").value = b.dataset.command;
-    send(false);
-  };
-});
 
 async function refreshGoogleStatus() {
   if (!token) return;
@@ -1250,8 +1171,7 @@ async function refreshGoogleStatus() {
 }
 $("connectGoogle").onclick = () => run(async () => {
   const r = await api("/api/google/auth-url");
-  window.open(r.url, "_blank", "noopener,noreferrer");
-  show("Opened Google sign-in window.");
+  openExternalSmart(r.url, "Google Sign-In");
 });
 $("fetchEmails").onclick = () => run(async () => {
   const r = await api("/api/google/emails");
@@ -1272,7 +1192,7 @@ async function refreshTasks() {
     const r = node("div", "");
     r.className = "row";
     const label = node("span", (t.done ? "✓ " : "○ ") + t.title);
-    const a = node("button", "Toggle");
+    const a = node("button", "Done");
     const b = node("button", "×");
     a.onclick = () => run(async () => { await api("/api/tasks/" + t.id + "/toggle", "POST"); refreshTasks(); });
     b.onclick = () => run(async () => { if (confirm("Delete task?")) { await api("/api/tasks/" + t.id, "DELETE"); refreshTasks(); } });
@@ -1291,7 +1211,7 @@ $("research").onclick = () => run(async () => {
   const r = await api("/api/research?q=" + encodeURIComponent(q));
   $("results").replaceChildren();
   if (!r.results || !r.results.length) {
-    $("results").textContent = "No Wikipedia articles found for \"" + q + "\". Try broader keywords.";
+    $("results").textContent = "No articles found for \"" + q + "\".";
     return;
   }
   for (const x of r.results) {
@@ -1320,23 +1240,20 @@ async function refreshReminders() {
     if (x.fired && !seen.has(x.id)) {
       seen.add(x.id);
       show("REMINDER: " + x.title);
-      if ("Notification" in window && Notification.permission === "granted") new Notification("JARVIS reminder", { body: x.title });
     }
   }
 }
 
 async function launchApp(name) {
   await run(async () => {
-    if (!token) { show("🔒 First click Set access token and unlock JARVIS."); return; }
-    if (!confirm("Launch " + name + " on this Windows computer?")) return;
+    if (!token) { show("🔒 Tap Set Access Token first."); return; }
+    if (!confirm("Launch " + name + " on Windows PC?")) return;
     const r = await api("/api/desktop/open", "POST", { name, confirm: true });
     show("Launched " + r.launched);
     refreshAudit();
   });
 }
 document.querySelectorAll("[data-app]").forEach(b => {
-  b.disabled = false;
-  b.title = "Localhost only; requires explicit confirmation";
   b.onclick = () => launchApp(b.dataset.app);
 });
 
@@ -1348,7 +1265,7 @@ async function refreshAudit() {
 async function refresh() {
   try {
     const h = await fetch("/api/health").then(r => r.json());
-    $("status").textContent = h.ai_configured ? "● " + h.ai_provider.toUpperCase() + " configured" : "● AI not configured";
+    $("status").textContent = h.ai_configured ? "● " + h.ai_provider.toUpperCase() + " Ready" : "● AI Off";
     if (!token) {
       $("status").textContent = "● Token needed";
       return;
@@ -1362,7 +1279,6 @@ async function refresh() {
     }
   } catch (e) {
     $("status").textContent = "● Locked";
-    show("Authentication required: click Set access token and enter your JARVIS_TOKEN. " + e.message);
   }
 }
 refresh();
@@ -1383,41 +1299,29 @@ $("installPwaBtn").onclick = async () => {
 };
 $("mobileShareBtn").onclick = async () => {
   if (navigator.share) {
-    try { await navigator.share({ title: "JARVIS NEXUS", text: conversationText().slice(-500) || "JARVIS NEXUS Assistant", url: location.href }); } catch (e) {}
+    try { await navigator.share({ title: "JARVIS-AI NEXUS", text: "Try JARVIS-AI Personal Assistant", url: location.href }); } catch (e) {}
   } else {
-    show("Copy link: " + location.href);
+    show("App Link: " + location.href);
   }
 };
 
 let navHighlightTimer;
-const navFeedback = document.createElement("div");
-navFeedback.id = "navFeedback";
-navFeedback.setAttribute("role", "status");
-navFeedback.setAttribute("aria-live", "polite");
-const sidebarStatusPanel = document.querySelector(".sidebar .panel:nth-child(2)");
-if (sidebarStatusPanel) sidebarStatusPanel.appendChild(navFeedback);
-
 for (const b of document.querySelectorAll("[data-go]")) {
   b.addEventListener("click", () => {
     const target = document.getElementById(b.dataset.go);
-    if (!target) { navFeedback.textContent = "Section unavailable"; return; }
+    if (!target) return;
     target.setAttribute("tabindex", "-1");
     document.querySelectorAll("[data-go]").forEach(x => { x.classList.remove("active"); x.removeAttribute("aria-current"); });
     document.querySelectorAll('[data-go="' + b.dataset.go + '"]').forEach(x => { x.classList.add("active"); x.setAttribute("aria-current", "location"); });
     document.querySelectorAll(".nav-target-highlight").forEach(x => x.classList.remove("nav-target-highlight"));
     target.classList.add("nav-target-highlight");
-    navFeedback.textContent = "Viewing: " + b.textContent.trim();
-    if (b.dataset.go === "home") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      const header = document.querySelector("header");
-      const offset = (header ? header.getBoundingClientRect().height : 0) + 16;
-      const top = target.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-      target.focus({ preventScroll: true });
-    }
+    const header = document.querySelector("header");
+    const offset = (header ? header.getBoundingClientRect().height : 0) + 12;
+    const top = target.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    target.focus({ preventScroll: true });
     clearTimeout(navHighlightTimer);
-    navHighlightTimer = setTimeout(() => target.classList.remove("nav-target-highlight"), 2500);
+    navHighlightTimer = setTimeout(() => target.classList.remove("nav-target-highlight"), 2000);
   });
 }
 
