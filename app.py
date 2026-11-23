@@ -194,128 +194,12 @@ def resolve_workspace_file(rel_path: str) -> Path:
     return target
 
 
-GURMUKHI_PHRASE_FIXES = {
-    "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ": "सत श्री अकाल",
-    "ਵਾਹਿਗੁਰੂ ਜੀ ਕਾ ਖਾਲਸਾ ਵਾਹਿਗੁਰੂ ਜੀ ਕੀ ਫਤਿਹ": "वाहेगुरु जी का खालसा वाहेगुरु जी की फतेह",
-    "ਤੁਹਾਡੀ": "तुहाडी",
-    "ਮਦਦ": "मदद",
-    "ਕਰ ਸਕਦੀ ਹਾਂ": "कर सकदी हां",
-    "ਕਰਾਂਗੀ": "करांगी",
-    "ਸਮਝ ਗਈ": "समझ गई",
-    "ਕੋਈ ਗੱਲ ਨਹੀਂ": "कोई गल नहीं",
-    "ਬਿਲਕੁਲ": "बिलकुल",
-    "ਦੱਸੋ": "दस्सो",
-    "ਕਿੱਦਾਂ": "किद्दां",
-    "ਤੁਸੀਂ": "तुसीं",
-    "ਮੈਂ": "मैं",
-    "ਹਾਂਜੀ": "हांजी",
-    "ਧੰਨਵਾਦ": "धन्यवाद",
-    "ਜਦੋਂ": "जदों",
-    "ਲੋੜ": "लोड़",
-    "ਬੇਝਿਜਕ": "बेझिझक",
-    "ਹਮੇਸ਼ਾ": "हमेशा",
-    "ਹਾਜ਼ਰ": "हाज़िर",
-    "ਮੌਸਮ": "मौसम",
-    "ਚੰਗਾ": "चंगा",
-    "ਸੋਹਣਾ": "सोहणा",
-    "ਵਧੀਆ": "वधीया",
-    "ਅੱਜ": "अज्ज",
-    "ਕੱਲ੍ਹ": "कल्ल",
-    "ਸਵੇਰ": "सवेर",
-    "ਸ਼ਾਮ": "शाम",
-    "ਰਾਤ": "रात",
-    "ਪੰਜਾਬੀ": "पंजाबी",
-    "ਗੱਲਬਾਤ": "गलबात",
-}
-
-GURMUKHI_CONSONANTS = {
-    "ੳ": "उ", "ਅ": "अ", "ੲ": "इ", "ਸ": "स", "ਹ": "ह",
-    "ਕ": "क", "ਖ": "ख", "ਗ": "ग", "ਘ": "घ", "ਙ": "ङ",
-    "ਚ": "च", "ਛ": "छ", "ਜ": "ज", "ਝ": "झ", "ਞ": "ञ",
-    "ਟ": "ट", "ਠ": "ठ", "ਡ": "ड", "ਢ": "ढ", "ਣ": "ण",
-    "ਤ": "त", "ਥ": "थ", "ਦ": "द", "ਧ": "ध", "ਨ": "न",
-    "ਪ": "प", "ਫ": "फ", "ਬ": "ब", "ਭ": "भ", "ਮ": "म",
-    "ਯ": "य", "ਰ": "र", "ਲ": "ल", "ਵ": "व", "ੜ": "ड़",
-    "ਸ਼": "श", "ਖ਼": "ख़", "ਗ਼": "ग़", "ਜ਼": "ज़", "ਫ਼": "फ़", "ਲ਼": "ल",
-}
-
-GURMUKHI_MATRAS = {
-    "ਾ": "ा", "ਿ": "ि", "ੀ": "ी", "ੁ": "ु", "ੂ": "ू",
-    "ੇ": "े", "ੈ": "ै", "ੋ": "ो", "ੌ": "ौ",
-}
-
-
 def normalize_punjabi_speech(text: str) -> str:
     s = str(text or "").strip()
     if not s:
         return s
-    for pa_phrase, hi_phrase in GURMUKHI_PHRASE_FIXES.items():
-        s = s.replace(pa_phrase, hi_phrase)
-    if not re.search(r"[\u0A00-\u0A7F]", s):
-        return re.sub(r"\s+", " ", s).strip()
-
-    out = []
-    i = 0
-    n = len(s)
-    while i < n:
-        ch = s[i]
-        pair = s[i:i + 2]
-        if pair in GURMUKHI_CONSONANTS:
-            base = GURMUKHI_CONSONANTS[pair]
-            i += 2
-        elif ch in GURMUKHI_CONSONANTS:
-            base = GURMUKHI_CONSONANTS[ch]
-            i += 1
-        elif ch in GURMUKHI_MATRAS:
-            out.append(GURMUKHI_MATRAS[ch])
-            i += 1
-            continue
-        elif ch in ("ਂ", "ੰ"):
-            out.append("ं")
-            i += 1
-            continue
-        elif ch in ("ੱ", "਼", "੍"):
-            i += 1
-            continue
-        elif "\u0A66" <= ch <= "\u0A6F":
-            out.append(chr(ord("०") + (ord(ch) - ord("\u0A66"))))
-            i += 1
-            continue
-        elif ch in ("।", "॥"):
-            out.append("।")
-            i += 1
-            continue
-        else:
-            out.append(ch)
-            i += 1
-            continue
-
-        while i < n and s[i] in ("਼", "ੱ"):
-            i += 1
-
-        if i < n and s[i] == "੍":
-            out.append(base + "्")
-            i += 1
-            continue
-
-        if i < n and s[i] in GURMUKHI_MATRAS:
-            matra = GURMUKHI_MATRAS[s[i]]
-            i += 1
-            nasal = ""
-            if i < n and s[i] in ("ਂ", "ੰ"):
-                nasal = "ं"
-                i += 1
-            out.append(base + matra + nasal)
-        else:
-            nasal = ""
-            if i < n and s[i] in ("ਂ", "ੰ"):
-                nasal = "ं"
-                i += 1
-            out.append(base + nasal)
-
-    joined = "".join(out)
-    joined = re.sub(r"\s+([।?!,.:;])", r"\1", joined)
-    return re.sub(r"\s+", " ", joined).strip()
+    s = re.sub(r"\s+([।?!,.:;])", r"\1", s)
+    return re.sub(r"\s+", " ", s).strip()
 
 
 SYSTEM = (
@@ -426,10 +310,10 @@ def ai_reply(message, voice_mode=False, language="auto"):
         "ta-IN": "Tamil",
         "te-IN": "Telugu",
         "pa-IN": (
-            "polished, natural everyday bolchal Punjabi written STRICTLY in Gurmukhi script "
-            "(use clear, simple Punjabi words like ਕਿੱਦਾਂ, ਦੱਸੋ, ਮੈਂ ਕਰ ਸਕਦੀ ਹਾਂ, ਬਿਲਕੁਲ, ਠੀਕ ਹੈ; "
-            "avoid stiff bookish/Sanskritized words and never mix Hindi or English in the main reply; "
-            "always complete the sentence naturally)"
+            "warm, natural everyday bolchal Punjabi written STRICTLY in Gurmukhi script "
+            "(use simple, natural Punjabi bolchal like ਮੈਂ ਤੁਹਾਡੀ ਮਦਦ ਕਰ ਸਕਦੀ ਹਾਂ, ਦੱਸੋ ਕਿੱਦਾਂ ਮਦਦ ਕਰਾਂ, ਕੋਈ ਗੱਲ ਨਹੀਂ, ਠੀਕ ਹੈ; "
+            "avoid stiff bookish words or broken syllables; never mix Hindi or English in the main reply; "
+            "always complete the sentence cleanly)"
         ),
         "pa-Latn-IN": "natural everyday bolchal Punjabi written ONLY in Roman (Latin) script, with authentic Punjabi words",
         "ur-PK": "Urdu",
@@ -480,8 +364,7 @@ async def tts(req: SpeechRequest):
             selected = TTS_VOICES["hi-IN"]
             fallback = True
             rate = "-4%"
-            if re.search(r"[\u0A00-\u0A7F]", spoken_input):
-                spoken_input = normalize_punjabi_speech(spoken_input)
+            spoken_input = normalize_punjabi_speech(spoken_input)
         else:
             selected = TTS_VOICES[req.language]
             rate = "+8%" if req.language.startswith("en") else "+4%"
@@ -614,7 +497,6 @@ def generate_document(req: DocumentRequest):
             from xml.sax.saxutils import escape
 
             font = "Helvetica"
-            has_gurmukhi_font = False
             candidates = [
                 str(ROOT / "fonts" / "NotoSansGurmukhi-Regular.ttf"),
                 str(ROOT / "fonts" / "NotoSans-Regular.ttf"),
@@ -627,15 +509,12 @@ def generate_document(req: DocumentRequest):
                     try:
                         pdfmetrics.registerFont(TTFont("JarvisUnicode", candidate))
                         font = "JarvisUnicode"
-                        if "gurmukhi" in candidate.lower() or "raavi" in candidate.lower():
-                            has_gurmukhi_font = True
                         break
                     except Exception:
                         pass
 
             def fmt_pdf(s: str) -> str:
-                val = normalize_punjabi_speech(s) if not has_gurmukhi_font else s
-                return escape(val)
+                return escape(normalize_punjabi_speech(s))
 
             styles = getSampleStyleSheet()
             styles.add(ParagraphStyle(name="JTitle", fontName=font, fontSize=19, leading=26, textColor=colors.HexColor("#15304f"), spaceAfter=18))
@@ -845,7 +724,7 @@ def health():
     return {
         "ok": True,
         "service": "jarvis-nexus-global",
-        "version": "1.13.0",
+        "version": "1.14.0",
         "ai_configured": provider != "none",
         "ai_provider": provider,
         "token_configured": len(TOKEN) >= 32,
