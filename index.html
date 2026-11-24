@@ -95,7 +95,7 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
 .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .summary div{padding:9px 4px;border:1px solid #1c7899;text-align:center;border-radius:6px;font-size:11px;color:#80eaff}
 .summary strong{display:block;font-size:20px;color:#fff}
-.scrollbox{max-height:145px;overflow:auto;margin-top:6px}
+.scrollbox{max-height:185px;overflow:auto;margin-top:6px}
 .row{display:flex;gap:6px;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #16445a;font-size:12px}
 .row span{flex:1}
 .row button{padding:5px 8px;font-size:11px}
@@ -153,7 +153,7 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
 <header>
   <div class="logo">
     <div class="logo-icon"><img alt="JARVIS-AI logo" height="54" src="/jarvis-nexus-logo.png" width="54"/></div>
-    <div><h1>JARVIS-AI</h1><small>NEXUS v4.7 · MOBILE READY</small></div>
+    <div><h1>JARVIS-AI</h1><small>NEXUS v4.8 · FAST VOICE &amp; FULL SYNC</small></div>
   </div>
   <span class="brand-subtitle">Your AI Personal Assistant</span>
   <span class="header-tag">☁ Cloud ready</span>
@@ -293,17 +293,17 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
     </section>
 
     <section class="panel" id="googlePanel">
-      <h2>◈ Gmail &amp; Contacts</h2>
+      <h2>◈ Gmail &amp; Contacts <span id="contactCountBadge" class="muted"></span></h2>
       <div class="bar">
         <button id="connectGoogle" type="button">🔗 Connect Google</button>
         <button id="fetchEmails" type="button">✉ Read Inbox</button>
         <button data-web="https://mail.google.com/" data-label="Gmail Web" type="button">🌐 Open Gmail</button>
       </div>
       <div class="bar">
-        <input id="contactQuery" placeholder="Search contact name/email"/>
-        <button id="fetchContacts" type="button">👤 Contacts</button>
+        <input id="contactQuery" placeholder="Type name, email or number to filter"/>
+        <button id="fetchContacts" type="button">👤 Sync All</button>
       </div>
-      <div class="scrollbox muted" id="googleOutput">Tap Open Gmail for web mail, or Connect Google to sync inbox &amp; contacts here.</div>
+      <div class="scrollbox muted" id="googleOutput">Tap Sync All to import all Gmail contacts, or type a name to filter instantly.</div>
     </section>
 
     <section class="panel" id="taskpanel">
@@ -359,6 +359,7 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
 <script>
 let token = sessionStorage.getItem("jarvis_token") || localStorage.getItem("jarvis_token") || "";
 let voice = true;
+let cachedContacts = [];
 const $ = id => document.getElementById(id);
 
 function node(tag, text) {
@@ -456,7 +457,7 @@ function isSpeakingOrBusy() {
   );
 }
 
-function queueRelisten(delay = 300) {
+function queueRelisten(delay = 200) {
   clearTimeout(relistenTimer);
   if (!continuousMode || !conversationMode || document.hidden) return;
   relistenTimer = setTimeout(() => {
@@ -508,7 +509,7 @@ function chooseSpeechVoice(lang) {
   const candidates = matches.length
     ? matches
     : voices.filter(v => v.lang.toLowerCase().split("-")[0] === lang.toLowerCase().split("-")[0]);
-  return candidates.find(v => /female|swara|neerja|jenny|sonia|zira|heera|vaani/i.test(v.name)) || candidates[0] || null;
+  return candidates.find(v => /female|swara|neerja|jenny|sonia|zira|heera|vaani|gurpreet|simran/i.test(v.name)) || candidates[0] || null;
 }
 
 function speechChunks(text, max = 180) {
@@ -578,7 +579,7 @@ function browserSpeechFallback(cleaned, lang, generation) {
     const u = new SpeechSynthesisUtterance(chunks[i++]);
     u.lang = effectiveLang;
     u.voice = selected;
-    u.rate = 0.96;
+    u.rate = 1.02;
     u.onend = next;
     u.onerror = () => {
       if (failed) return;
@@ -609,6 +610,13 @@ async function say(text, speakOverride = null) {
     return;
   }
   const lang = speechLanguage(cleaned);
+
+  // If browser has a native Punjabi voice installed, prefer it for authentic Gurmukhi pronunciation
+  if (lang === "pa-IN" && ("speechSynthesis" in window) && chooseSpeechVoice("pa-IN")) {
+    browserSpeechFallback(cleaned, "pa-IN", generation);
+    return;
+  }
+
   let fallbackUsed = false;
   let finished = false;
   let controller = null;
@@ -659,7 +667,7 @@ async function say(text, speakOverride = null) {
       release();
       if (generation === speechGeneration) {
         $("voiceHint").textContent = "Tap Start Listening to speak.";
-        queueRelisten(300);
+        queueRelisten(200);
       }
     };
     audio.onerror = () => fallbackOnce();
@@ -905,7 +913,7 @@ async function send(fromVoice = false) {
     show("Error: " + e.message);
   } finally {
     voiceBusy = false;
-    if (fromVoice && !isSpeakingOrBusy()) queueRelisten(300);
+    if (fromVoice && !isSpeakingOrBusy()) queueRelisten(200);
   }
 }
 
@@ -1032,7 +1040,7 @@ function startVoiceRecognition() {
       clearTimeout(endpointTimer);
       endpointTimer = setTimeout(() => {
         try { rec.stop(); } catch (err) {}
-      }, 450);
+      }, 220);
       return;
     }
     clearTimeout(endpointTimer);
@@ -1040,7 +1048,7 @@ function startVoiceRecognition() {
       endpointTimer = setTimeout(() => {
         if (!finalText) finalText = lastInterim;
         try { rec.stop(); } catch (err) {}
-      }, 1100);
+      }, 750);
     }
   };
   rec.onerror = e => {
@@ -1071,7 +1079,7 @@ function startVoiceRecognition() {
     if (!hadError && transcript) {
       if (isLikelyMisheardWakeWord(transcript)) {
         $("message").value = "";
-        queueRelisten(250);
+        queueRelisten(200);
         return;
       }
       $("message").value = transcript;
@@ -1080,7 +1088,7 @@ function startVoiceRecognition() {
       send(true);
     } else {
       if (!continuousMode) conversationMode = false;
-      queueRelisten(450);
+      queueRelisten(300);
     }
   };
 
@@ -1121,7 +1129,7 @@ document.addEventListener("visibilitychange", () => {
       activeRecognition = null;
     }
   } else {
-    queueRelisten(300);
+    queueRelisten(250);
   }
 });
 
@@ -1164,6 +1172,25 @@ $("testMic").onclick = async () => {
   }
 };
 
+function renderContactsList(filterText = "") {
+  const ql = filterText.trim().toLowerCase();
+  const matched = ql
+    ? cachedContacts.filter(c => (c.name + " " + c.email + " " + c.phone).toLowerCase().includes(ql))
+    : cachedContacts;
+  $("contactCountBadge").textContent = cachedContacts.length ? `(${matched.length}/${cachedContacts.length})` : "";
+  if (!matched.length) {
+    $("googleOutput").textContent = cachedContacts.length ? "No matching contacts." : "No contacts synced yet.";
+    return;
+  }
+  $("googleOutput").replaceChildren(
+    ...matched.slice(0, 250).map(c => node("div", "👤 " + c.name + (c.email ? " · " + c.email : "") + (c.phone ? " · " + c.phone : "")))
+  );
+}
+
+$("contactQuery").addEventListener("input", () => {
+  if (cachedContacts.length) renderContactsList($("contactQuery").value);
+});
+
 async function refreshGoogleStatus() {
   if (!token) return;
   try {
@@ -1181,10 +1208,11 @@ $("fetchEmails").onclick = () => run(async () => {
   if (!r.emails?.length) $("googleOutput").textContent = "No recent emails.";
 });
 $("fetchContacts").onclick = () => run(async () => {
-  const q = encodeURIComponent($("contactQuery").value.trim());
-  const r = await api("/api/google/contacts?q=" + q);
-  $("googleOutput").replaceChildren(...(r.contacts || []).map(c => node("div", "👤 " + c.name + (c.email ? " · " + c.email : "") + (c.phone ? " · " + c.phone : ""))));
-  if (!r.contacts?.length) $("googleOutput").textContent = "No matching contacts.";
+  $("googleOutput").textContent = "Syncing all Gmail contacts...";
+  const r = await api("/api/google/contacts?limit=5000");
+  cachedContacts = r.contacts || [];
+  renderContactsList($("contactQuery").value);
+  show("✅ Imported " + cachedContacts.length + " contacts from Google.");
 });
 
 async function refreshTasks() {
