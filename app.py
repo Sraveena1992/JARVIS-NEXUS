@@ -1,6 +1,8 @@
-"""JARVIS NEXUS Global: Fast Voice, Polished Punjabi, Full Contacts Sync, Cloud & Google Workspace Ready."""
+"""JARVIS NEXUS Global: Zero-Token User Onboarding, Auto Google Contacts Sync, Fast Voice & Punjabi Ready."""
 import ast
 import asyncio
+import base64
+import hashlib
 import hmac
 import io
 import json
@@ -28,6 +30,12 @@ ROOT = Path(__file__).resolve().parent
 DB = Path(os.environ.get("JARVIS_DB", str(ROOT / "jarvis.db")))
 WORKSPACE_DIR = Path(os.environ.get("JARVIS_WORKSPACE", str(ROOT / "workspace")))
 TOKEN = os.environ.get("JARVIS_TOKEN", "")
+PUBLIC_MODE = os.environ.get("JARVIS_PUBLIC_MODE", "1").strip().lower() in ("1", "true", "yes", "on")
+SESSION_SECRET = os.environ.get("JARVIS_SESSION_SECRET", "").strip() or (
+    TOKEN if len(TOKEN) >= 32 else hashlib.sha256((str(ROOT) + "|jarvis-nexus-session").encode("utf-8")).hexdigest()
+)
+SESSION_COOKIE = "jarvis_sid"
+
 app = FastAPI(title="JARVIS NEXUS GLOBAL", docs_url=None, redoc_url=None, openapi_url=None)
 _hits = defaultdict(deque)
 _hit_lock = threading.Lock()
@@ -65,7 +73,47 @@ def kv_set(k, v):
         )
 
 
-def throttle(key, limit=60, window=60):
+def _sign_sid(raw_id: str) -> str:
+    sig = hmac.new(SESSION_SECRET.encode("utf-8"), raw_id.encode("utf-8"), hashlib.sha256).hexdigest()[:24]
+    return f"{raw_id}.{sig}"
+
+
+def _verify_sid(cookie_val: str) -> str:
+    if not cookie_val or "." not in cookie_val:
+        return ""
+    raw_id, sig = cookie_val.rsplit(".", 1)
+    if not re.fullmatch(r"[A-Za-z0-9_-]{8,48}", raw_id):
+        return ""
+    expected = hmac.new(SESSION_SECRET.encode("utf-8"), raw_id.encode("utf-8"), hashlib.sha256).hexdigest()[:24]
+    return raw_id if hmac.compare_digest(sig, expected) else ""
+
+
+def get_session_id(request: Request) -> str:
+    sid = _verify_sid(request.cookies.get(SESSION_COOKIE, ""))
+    if sid:
+        return sid
+    # Backward compatibility if user connected Google before session cookies existed
+    if kv_get("google_refresh_token") or kv_get("google_access_token"):
+        return "default"
+    return "guest"
+
+
+def user_kv_get(request: Request, key: str, default: str = "") -> str:
+    sid = get_session_id(request)
+    if sid != "default":
+        val = kv_get(f"u:{sid}:{key}", "")
+        if val:
+            return val
+    return kv_get(key, default)
+
+
+def user_kv_set(request: Request, key: str, value: str):
+    sid = get_session_id(request)
+    target_key = key if sid == "default" else f"u:{sid}:{key}"
+    kv_set(target_key, value)
+
+
+def throttle(key, limit=90, window=60):
     t = time.monotonic()
     with _hit_lock:
         if len(_hits) > 10000:
@@ -81,29 +129,48 @@ def throttle(key, limit=60, window=60):
 
 
 def auth(request: Request):
+    supplied = request.headers.get("X-Jarvis-Token", "").strip()
+    if supplied and len(TOKEN) >= 32 and hmac.compare_digest(supplied, TOKEN):
+        throttle("auth:" + supplied[:12], 180)
+        return True
+    if PUBLIC_MODE:
+        client_key = request.client.host if request.client else "pub"
+        throttle("pub:" + client_key, 180)
+        return True
     if len(TOKEN) < 32:
         raise HTTPException(503, "JARVIS_TOKEN must be configured (at least 32 characters)")
-    supplied = request.headers.get("X-Jarvis-Token", "")
-    if not hmac.compare_digest(supplied, TOKEN):
-        raise HTTPException(401, "Invalid JARVIS token")
-    origin = request.headers.get("origin")
-    if origin:
-        p = urllib.parse.urlsplit(origin)
-        host = request.headers.get("host", "")
-        if p.netloc != host or p.scheme not in ("https", "http"):
-            raise HTTPException(403, "Cross-origin request blocked")
-    throttle("auth:" + supplied[:12], 120)
-    return True
+    raise HTTPException(401, "Invalid JARVIS token")
 
 
 @app.middleware("http")
 async def secure(request: Request, call_next):
     if request.url.path.startswith("/api/"):
         try:
-            throttle("ip:" + request.client.host if request.client else "ip:unknown", 240)
+            throttle("ip:" + (request.client.host if request.client else "ip:unknown"), 240)
         except HTTPException as e:
             return JSONResponse({"detail": e.detail}, status_code=e.status_code)
+
+    existing_cookie = request.cookies.get(SESSION_COOKIE, "")
+    has_valid_sid = bool(_verify_sid(existing_cookie))
+    new_signed_sid = ""
+    if not has_valid_sid:
+        new_raw = secrets.token_urlsafe(12)
+        new_signed_sid = _sign_sid(new_raw)
+        request.state._new_sid = new_raw
+
     response = await call_next(request)
+    if new_signed_sid:
+        is_https = request.headers.get("x-forwarded-proto", request.url.scheme) == "https"
+        response.set_cookie(
+            SESSION_COOKIE,
+            new_signed_sid,
+            max_age=60 * 60 * 24 * 30,
+            httponly=True,
+            samesite="lax",
+            secure=is_https,
+            path="/",
+        )
+
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["X-Frame-Options"] = "DENY"
@@ -349,7 +416,7 @@ TTS_VOICES = {
 
 @app.post("/api/tts", dependencies=[Depends(auth)])
 async def tts(req: SpeechRequest):
-    throttle("tts:" + TOKEN[:12], 60, 60)
+    throttle("tts:global", 90, 60)
     try:
         import edge_tts
     except ImportError as exc:
@@ -459,7 +526,7 @@ def document_sections(text):
 
 @app.post("/api/document", dependencies=[Depends(auth)])
 def generate_document(req: DocumentRequest):
-    throttle("document:" + TOKEN[:12], 15, 60)
+    throttle("document:global", 25, 60)
     if req.format not in ("pdf", "docx"):
         raise HTTPException(400, "Choose pdf or docx")
     detailed_text = expand_detailed_content(req.title, req.content)
@@ -558,14 +625,14 @@ def google_oauth_config(request: Request):
 
 
 def google_access_token(request: Request):
-    tok = kv_get("google_access_token")
-    exp = float(kv_get("google_token_expires", "0") or "0")
+    tok = user_kv_get(request, "google_access_token")
+    exp = float(user_kv_get(request, "google_token_expires", "0") or "0")
     if tok and time.time() < exp - 60:
         return tok
-    refresh_tok = kv_get("google_refresh_token")
+    refresh_tok = user_kv_get(request, "google_refresh_token")
     cid, csec, _ = google_oauth_config(request)
     if not (refresh_tok and cid and csec):
-        raise HTTPException(401, "Google account not connected. Click Connect Google first.")
+        raise HTTPException(401, "Google account not connected. Tap Sign in with Google first.")
     body = urllib.parse.urlencode(
         {"client_id": cid, "client_secret": csec, "refresh_token": refresh_tok, "grant_type": "refresh_token"}
     ).encode("utf-8")
@@ -574,18 +641,31 @@ def google_access_token(request: Request):
         with urllib.request.urlopen(req, timeout=12) as resp:
             data = json.load(resp)
         tok = data["access_token"]
-        kv_set("google_access_token", tok)
-        kv_set("google_token_expires", str(time.time() + int(data.get("expires_in", 3600))))
+        user_kv_set(request, "google_access_token", tok)
+        user_kv_set(request, "google_token_expires", str(time.time() + int(data.get("expires_in", 3600))))
         return tok
     except Exception as exc:
         raise HTTPException(401, "Google session expired. Reconnect Google account.") from exc
 
 
+def _decode_jwt_email(id_token_str: str) -> str:
+    try:
+        parts = id_token_str.split(".")
+        if len(parts) < 2:
+            return ""
+        payload_b64 = parts[1] + "=" * (-len(parts[1]) % 4)
+        payload = json.loads(base64.urlsafe_b64decode(payload_b64.encode("utf-8")).decode("utf-8"))
+        return str(payload.get("email") or payload.get("name") or "")
+    except Exception:
+        return ""
+
+
 @app.get("/api/google/status", dependencies=[Depends(auth)])
 def google_status(request: Request):
     cid, csec, _ = google_oauth_config(request)
-    connected = bool(kv_get("google_refresh_token") or kv_get("google_access_token"))
-    return {"configured": bool(cid and csec), "connected": connected}
+    connected = bool(user_kv_get(request, "google_refresh_token") or user_kv_get(request, "google_access_token"))
+    account = user_kv_get(request, "google_account_email")
+    return {"configured": bool(cid and csec), "connected": connected, "account": account}
 
 
 @app.get("/api/google/auth-url", dependencies=[Depends(auth)])
@@ -594,8 +674,14 @@ def google_auth_url(request: Request):
     if not (cid and csec):
         raise HTTPException(503, "Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in server environment variables.")
     state = secrets.token_urlsafe(24)
-    _oauth_states[state] = time.time() + 600
+    sid = get_session_id(request)
+    if sid == "guest":
+        sid = getattr(request.state, "_new_sid", "") or secrets.token_urlsafe(12)
+    _oauth_states[state] = {"exp": time.time() + 600, "sid": sid}
     scopes = " ".join([
+        "openid",
+        "email",
+        "profile",
         "https://www.googleapis.com/auth/gmail.readonly",
         "https://www.googleapis.com/auth/gmail.send",
         "https://www.googleapis.com/auth/contacts.readonly",
@@ -607,7 +693,7 @@ def google_auth_url(request: Request):
         "response_type": "code",
         "scope": scopes,
         "access_type": "offline",
-        "prompt": "consent",
+        "prompt": "select_account",
         "state": state,
     })
     return {"url": "https://accounts.google.com/o/oauth2/v2/auth?" + params}
@@ -615,9 +701,10 @@ def google_auth_url(request: Request):
 
 @app.get("/api/google/callback")
 def google_callback(request: Request, code: str = "", state: str = ""):
-    exp = _oauth_states.pop(state, 0)
-    if not code or exp < time.time():
+    entry = _oauth_states.pop(state, None)
+    if not code or not entry or entry.get("exp", 0) < time.time():
         raise HTTPException(400, "Invalid or expired OAuth state")
+    sid = entry.get("sid") or "default"
     cid, csec, redirect_uri = google_oauth_config(request)
     body = urllib.parse.urlencode({
         "code": code,
@@ -630,12 +717,35 @@ def google_callback(request: Request, code: str = "", state: str = ""):
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.load(resp)
-        kv_set("google_access_token", data["access_token"])
-        kv_set("google_token_expires", str(time.time() + int(data.get("expires_in", 3600))))
+        acc_tok = data["access_token"]
+        kv_set(f"u:{sid}:google_access_token", acc_tok)
+        kv_set(f"u:{sid}:google_token_expires", str(time.time() + int(data.get("expires_in", 3600))))
         if data.get("refresh_token"):
-            kv_set("google_refresh_token", data["refresh_token"])
-        audit("google.connect", "OAuth connected")
-        return RedirectResponse(url="/?google=connected")
+            kv_set(f"u:{sid}:google_refresh_token", data["refresh_token"])
+        email = _decode_jwt_email(data.get("id_token", ""))
+        if not email:
+            try:
+                ureq = urllib.request.Request("https://www.googleapis.com/oauth2/v2/userinfo", headers={"Authorization": "Bearer " + acc_tok})
+                with urllib.request.urlopen(ureq, timeout=8) as uresp:
+                    udata = json.load(uresp)
+                email = str(udata.get("email") or udata.get("name") or "")
+            except Exception:
+                email = ""
+        if email:
+            kv_set(f"u:{sid}:google_account_email", email)
+        audit("google.connect", email or sid)
+        resp_redir = RedirectResponse(url="/?google=connected")
+        is_https = request.headers.get("x-forwarded-proto", request.url.scheme) == "https"
+        resp_redir.set_cookie(
+            SESSION_COOKIE,
+            _sign_sid(sid),
+            max_age=60 * 60 * 24 * 30,
+            httponly=True,
+            samesite="lax",
+            secure=is_https,
+            path="/",
+        )
+        return resp_redir
     except Exception as exc:
         raise HTTPException(502, "Failed to exchange Google OAuth code") from exc
 
@@ -672,7 +782,6 @@ def google_contacts(request: Request, q: str = "", limit: int = 2500):
         return False
 
     try:
-        # 1. Fetch all saved Google Contacts via pagination
         page_token = ""
         for _ in range(25):
             params = {
@@ -692,7 +801,6 @@ def google_contacts(request: Request, q: str = "", limit: int = 2500):
             if not page_token:
                 break
 
-        # 2. Also include Gmail "Other Contacts" (auto-saved email recipients) if scope granted
         if len(out) < safe_limit:
             other_token = ""
             for _ in range(10):
@@ -716,6 +824,8 @@ def google_contacts(request: Request, q: str = "", limit: int = 2500):
                     break
 
         return {"contacts": out, "total": len(out)}
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(502, "Could not fetch Google Contacts") from exc
 
@@ -741,6 +851,8 @@ def google_emails(request: Request):
             hdrs = {h["name"].lower(): h["value"] for h in md.get("payload", {}).get("headers", [])}
             items.append({"id": m["id"], "from": hdrs.get("from", ""), "subject": hdrs.get("subject", "(No subject)"), "snippet": md.get("snippet", "")[:140]})
         return {"emails": items}
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(502, "Could not fetch Gmail inbox") from exc
 
@@ -779,7 +891,8 @@ def health():
     return {
         "ok": True,
         "service": "jarvis-nexus-global",
-        "version": "4.8.0",
+        "version": "4.9.0",
+        "public_mode": PUBLIC_MODE,
         "ai_configured": provider != "none",
         "ai_provider": provider,
         "token_configured": len(TOKEN) >= 32,
@@ -831,7 +944,7 @@ def history():
 
 @app.post("/api/chat", dependencies=[Depends(auth)])
 def chat(q: Chat):
-    throttle("chat:" + TOKEN[:12], 40, 60)
+    throttle("chat:global", 60, 60)
     msg = q.message.strip()
     if not msg:
         raise HTTPException(400, "Empty message")
@@ -966,7 +1079,7 @@ class VideoLookup(BaseModel):
 @app.post("/api/video/lookup", dependencies=[Depends(auth)])
 def video_lookup(req: VideoLookup):
     """Return a public YouTube video ID; do not download or proxy media."""
-    throttle("video:" + TOKEN[:12], 20, 60)
+    throttle("video:global", 35, 60)
     try:
         from yt_dlp import YoutubeDL
     except ImportError as exc:
