@@ -41,6 +41,11 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
 .panel:before{content:'';position:absolute;top:-1px;left:12px;width:45px;height:2px;background:linear-gradient(90deg,#ff981f,#44f3ff);box-shadow:0 0 12px #00dfff}
 .panel h2{font-size:14px;margin:0 0 10px;color:#b9f8ff;text-transform:uppercase;letter-spacing:.6px}
 
+.google-welcome-card{border:2px solid #29e4ff;background:linear-gradient(135deg,#072a4a,#031224);box-shadow:0 0 24px #00c8ff38}
+.google-welcome-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.google-signin-cta{background:linear-gradient(100deg,#1a73e8,#00b4e6);border:1px solid #82e9ff;color:#fff;font-weight:700;font-size:15px;padding:12px 18px;border-radius:12px;box-shadow:0 0 20px #00bfff66;white-space:nowrap}
+.google-connected-badge{color:#7dffb3;font-size:13px;font-weight:600}
+
 .sidebar{position:sticky;top:90px;min-width:0}
 .navbtn{display:block;width:100%;border:0;border-bottom:1px solid #0a3650;border-radius:6px;text-align:left;background:transparent;padding:11px;font-size:14px;min-height:42px}
 .navbtn.active{border:1px solid #32eaff;background:linear-gradient(90deg,#09517d,#07334f);box-shadow:0 0 18px #00cfff77}
@@ -48,7 +53,6 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
 .statrow span:last-child{color:#70f2d4}
 .security{font-size:11px;color:#8cb6c6;margin:7px 0}
 .nav-target-highlight{outline:3px solid #47eeff!important;outline-offset:2px;box-shadow:0 0 28px #00dfff88!important}
-#navFeedback{font-size:11px;color:#9af7ff;margin:8px 3px 2px;min-height:14px}
 
 .hero{padding:0;overflow:hidden}
 .hero-art{height:190px;position:relative;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#0b3b65 0%,#031223 70%);overflow:hidden}
@@ -69,7 +73,6 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
 .voice-wave i:nth-child(3n){animation-duration:1.05s}
 @keyframes jarvis-wave{from{transform:scaleY(.35);opacity:.5}to{transform:scaleY(2.1);opacity:1}}
 .voice-dock select{width:auto;max-width:220px;font-size:13px;min-height:44px}
-.footnote{color:#7caabc;font-size:11px;padding:6px 4px 0;margin:0;line-height:1.45}
 
 .log{height:185px;overflow:auto;border:1px solid #156886;background:#020c19;padding:12px;border-radius:8px;white-space:pre-wrap;font-size:14px;line-height:1.55;overflow-wrap:anywhere}
 .message{margin-bottom:10px}
@@ -129,6 +132,7 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
  .hero-art{height:126px;max-height:126px}
  .reference-hero-image{max-height:126px}
  .hero-caption{font-size:10px;letter-spacing:.3px;padding:6px}
+ .google-signin-cta{width:100%;text-align:center}
  .mic-cluster{width:100%;flex-wrap:wrap;gap:8px}
  #mic{width:100%;min-width:0;min-height:58px;font-size:16px}
  .voice-dock select{width:100%;max-width:100%}
@@ -153,19 +157,19 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
 <header>
   <div class="logo">
     <div class="logo-icon"><img alt="JARVIS-AI logo" height="54" src="/jarvis-nexus-logo.png" width="54"/></div>
-    <div><h1>JARVIS-AI</h1><small>NEXUS v4.8 · FAST VOICE &amp; FULL SYNC</small></div>
+    <div><h1>JARVIS-AI</h1><small>NEXUS v4.9 · ONE-TAP GOOGLE &amp; VOICE</small></div>
   </div>
   <span class="brand-subtitle">Your AI Personal Assistant</span>
   <span class="header-tag">☁ Cloud ready</span>
-  <span class="header-tag">🛡 Local access protected</span>
-  <span class="pill" id="status">● Checking local AI</span>
+  <span class="header-tag">⚡ Instant start</span>
+  <span class="pill" id="status">● Connecting</span>
 </header>
 
 <nav aria-label="Mobile navigation" class="nexus-mobile-bar">
   <button class="active" data-go="voiceDock" type="button">🎙 Voice &amp; AI</button>
   <button data-go="quickActionsPanel" type="button">⚡ Apps</button>
   <button data-go="taskpanel" type="button">☑ Tasks</button>
-  <button data-go="googlePanel" type="button">✉ Mail</button>
+  <button data-go="googlePanel" type="button">👤 Contacts</button>
 </nav>
 
 <div class="layout">
@@ -187,13 +191,23 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
       <div class="statrow"><span>Backend</span><span id="backendState">Checking</span></div>
       <div class="statrow"><span>AI model</span><span id="aiState">Checking</span></div>
       <div class="statrow"><span>Voice engine</span><span>Fast Neural</span></div>
-      <div class="statrow"><span>Google sync</span><span id="googleState">Check</span></div>
-      <p class="security">Status reflects actual configuration.</p>
+      <div class="statrow"><span>Google sync</span><span id="googleState">Checking</span></div>
+      <p class="security">No password required for normal use.</p>
     </section>
   </aside>
 
   <main id="home">
     <button class="nexus-install hidden" id="installPwaBtn" type="button">📲 Install JARVIS App on Phone</button>
+
+    <section class="panel google-welcome-card" id="googleWelcomeBanner">
+      <div class="google-welcome-row">
+        <div>
+          <h2>⚡ 1-Tap Google Sign-In &amp; Auto Contacts Sync</h2>
+          <div class="muted" id="googleBannerSub">No password needed · Tap once to link Google &amp; sync all contacts automatically / ਗੂਗਲ ਨਾਲ ਜੁੜੋ ਅਤੇ ਸੰਪਰਕ ਆਪਣੇ ਆਪ ਸਿੰਕ ਕਰੋ</div>
+        </div>
+        <button class="google-signin-cta" id="heroGoogleSignIn" type="button">🔵 Sign in with Google</button>
+      </div>
+    </section>
 
     <section class="panel hero">
       <div class="hero-art">
@@ -251,7 +265,7 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
         <button class="primary" id="send">➤ SEND</button>
       </div>
       <div class="bar">
-        <button id="unlock" type="button">🔑 Set Access Token</button>
+        <button id="unlock" type="button">🔑 Admin Token (Optional)</button>
         <button id="speak" type="button">🔊 Voice ON/OFF</button>
       </div>
       <div class="jarvis-doc-tools">
@@ -295,7 +309,7 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
     <section class="panel" id="googlePanel">
       <h2>◈ Gmail &amp; Contacts <span id="contactCountBadge" class="muted"></span></h2>
       <div class="bar">
-        <button id="connectGoogle" type="button">🔗 Connect Google</button>
+        <button id="connectGoogle" type="button">🔵 Sign in Google</button>
         <button id="fetchEmails" type="button">✉ Read Inbox</button>
         <button data-web="https://mail.google.com/" data-label="Gmail Web" type="button">🌐 Open Gmail</button>
       </div>
@@ -303,7 +317,7 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
         <input id="contactQuery" placeholder="Type name, email or number to filter"/>
         <button id="fetchContacts" type="button">👤 Sync All</button>
       </div>
-      <div class="scrollbox muted" id="googleOutput">Tap Sync All to import all Gmail contacts, or type a name to filter instantly.</div>
+      <div class="scrollbox muted" id="googleOutput">Tap Sign in Google once — contacts sync automatically.</div>
     </section>
 
     <section class="panel" id="taskpanel">
@@ -360,6 +374,7 @@ header small{letter-spacing:1px;font-size:12px;color:#00dcff;font-weight:800;dis
 let token = sessionStorage.getItem("jarvis_token") || localStorage.getItem("jarvis_token") || "";
 let voice = true;
 let cachedContacts = [];
+let autoSyncedOnce = false;
 const $ = id => document.getElementById(id);
 
 function node(tag, text) {
@@ -398,9 +413,11 @@ function openExternalSmart(url, label) {
 }
 
 async function api(path, method = "GET", body) {
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers["X-Jarvis-Token"] = token;
   const r = await fetch(path, {
     method,
-    headers: { "X-Jarvis-Token": token, "Content-Type": "application/json" },
+    headers,
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const raw = await r.text();
@@ -419,21 +436,17 @@ async function run(fn) {
 }
 
 async function setToken() {
-  const next = prompt("Enter your JARVIS access token (at least 32 characters):", token);
+  const next = prompt("Enter optional admin token:", token);
   if (next === null) return;
   token = next.trim();
-  try {
-    await api("/api/tasks");
+  if (token) {
     sessionStorage.setItem("jarvis_token", token);
     localStorage.setItem("jarvis_token", token);
-    show("🔓 Access verified! JARVIS is unlocked.");
-    await refresh();
-  } catch (e) {
-    token = "";
+  } else {
     sessionStorage.removeItem("jarvis_token");
     localStorage.removeItem("jarvis_token");
-    show("🔒 Token rejected: " + e.message);
   }
+  await refresh();
 }
 $("unlock").onclick = setToken;
 
@@ -611,7 +624,6 @@ async function say(text, speakOverride = null) {
   }
   const lang = speechLanguage(cleaned);
 
-  // If browser has a native Punjabi voice installed, prefer it for authentic Gurmukhi pronunciation
   if (lang === "pa-IN" && ("speechSynthesis" in window) && chooseSpeechVoice("pa-IN")) {
     browserSpeechFallback(cleaned, "pa-IN", generation);
     return;
@@ -648,9 +660,11 @@ async function say(text, speakOverride = null) {
   neuralController = controller;
   try {
     $("voiceHint").textContent = "JARVIS speaking...";
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["X-Jarvis-Token"] = token;
     const response = await fetch("/api/tts", {
       method: "POST",
-      headers: { "X-Jarvis-Token": token, "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ text: cleaned.slice(0, 1800), language: lang }),
       signal: controller.signal,
     });
@@ -742,10 +756,10 @@ $("mobileGmailBtn").onclick = () => {
 $("mobileContactsBtn").onclick = () => {
   const panel = $("googlePanel");
   if (panel) panel.scrollIntoView({ behavior: "smooth" });
-  if (token) {
-    $("fetchContacts").click();
+  if (cachedContacts.length) {
+    renderContactsList($("contactQuery").value);
   } else {
-    openExternalSmart("https://contacts.google.com/", "Google Contacts");
+    $("fetchContacts").click();
   }
 };
 
@@ -820,10 +834,6 @@ function browserIntent(message) {
 
 async function requestVideoPlayback(intent) {
   const q = intent.query;
-  if (!token) {
-    openExternalSmart(intent.url, intent.label);
-    return;
-  }
   show("Finding on YouTube: " + q);
   if ($("mediaInfo")) $("mediaInfo").textContent = "Searching YouTube: " + q;
   try {
@@ -893,7 +903,7 @@ async function send(fromVoice = false) {
           if (voice) await say(msg);
         }
       } catch (err) {
-        const msg = "Connect Google Contacts first to find " + targetName + ".";
+        const msg = "Tap Sign in with Google first so I can search your contacts for " + targetName + ".";
         show(msg);
         if (voice) await say(msg);
       }
@@ -959,9 +969,11 @@ async function createDocument(kind, topic) {
   const title = topic.replace(/^(?:jarvis[, ]*)?(?:create|generate|make)\s+(?:a\s+)?(?:professional\s+)?(?:pdf|word)\s+(?:report|document)?\s*(?:on|about|for|of)?\s*/i, "").trim() || topic;
   show("Creating " + kind.toUpperCase() + " for: " + title);
   try {
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["X-Jarvis-Token"] = token;
     const response = await fetch("/api/document", {
       method: "POST",
-      headers: { "X-Jarvis-Token": token, "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ title, content: title, format: kind === "pdf" ? "pdf" : "docx" }),
     });
     if (!response.ok) {
@@ -1191,17 +1203,51 @@ $("contactQuery").addEventListener("input", () => {
   if (cachedContacts.length) renderContactsList($("contactQuery").value);
 });
 
+async function startGoogleSignIn() {
+  await run(async () => {
+    const r = await api("/api/google/auth-url");
+    location.href = r.url;
+  });
+}
+
+async function autoSyncGoogleData(announceVoice = false) {
+  try {
+    $("googleOutput").textContent = "Auto-syncing your Google contacts & inbox...";
+    const res = await api("/api/google/contacts?limit=5000");
+    cachedContacts = res.contacts || [];
+    renderContactsList($("contactQuery").value);
+    if (announceVoice) {
+      show("✅ Google account connected! Auto-synced " + cachedContacts.length + " contacts.");
+      if (voice) {
+        await say("Aapka Google account connect ho gaya hai aur " + cachedContacts.length + " contacts sync ho gaye hain.");
+      }
+    }
+  } catch (e) {
+    $("googleOutput").textContent = "Tap Sign in Google to link your account.";
+  }
+}
+
 async function refreshGoogleStatus() {
-  if (!token) return;
   try {
     const s = await api("/api/google/status");
-    $("googleState").textContent = s.connected ? "Connected" : (s.configured ? "Ready" : "Setup needed");
+    if (s.connected) {
+      $("googleState").textContent = "Synced";
+      $("heroGoogleSignIn").textContent = "✅ Google Connected";
+      $("googleBannerSub").textContent = (s.account ? s.account + " · " : "") + "Contacts auto-synced & ready";
+      if (!autoSyncedOnce) {
+        autoSyncedOnce = true;
+        await autoSyncGoogleData(new URLSearchParams(location.search).get("google") === "connected");
+      }
+    } else {
+      $("googleState").textContent = s.configured ? "Tap Sign-In" : "Setup needed";
+      $("heroGoogleSignIn").textContent = "🔵 Sign in with Google";
+    }
   } catch (e) {}
 }
-$("connectGoogle").onclick = () => run(async () => {
-  const r = await api("/api/google/auth-url");
-  openExternalSmart(r.url, "Google Sign-In");
-});
+
+$("heroGoogleSignIn").onclick = startGoogleSignIn;
+$("connectGoogle").onclick = startGoogleSignIn;
+
 $("fetchEmails").onclick = () => run(async () => {
   const r = await api("/api/google/emails");
   $("googleOutput").replaceChildren(...(r.emails || []).map(m => node("div", "✉ " + m.subject + " (" + m.from + ")")));
@@ -1276,7 +1322,6 @@ async function refreshReminders() {
 
 async function launchApp(name) {
   await run(async () => {
-    if (!token) { show("🔒 Tap Set Access Token first."); return; }
     if (!confirm("Launch " + name + " on Windows PC?")) return;
     const r = await api("/api/desktop/open", "POST", { name, confirm: true });
     show("Launched " + r.launched);
@@ -1296,23 +1341,19 @@ async function refresh() {
   try {
     const h = await fetch("/api/health").then(r => r.json());
     $("status").textContent = h.ai_configured ? "● " + h.ai_provider.toUpperCase() + " Ready" : "● AI Off";
-    if (!token) {
-      $("status").textContent = "● Token needed";
-      return;
-    }
     await Promise.all([refreshTasks(), refreshReminders(), refreshAudit(), refreshGoogleStatus()]);
     const history = await api("/api/history");
     $("log").replaceChildren();
     history.forEach(x => show(x.content, x.role.toUpperCase()));
     if (new URLSearchParams(location.search).get("google") === "connected") {
-      show("✅ Google Gmail & Contacts connected.");
+      history.length || show("✅ Google Gmail & Contacts connected.");
     }
   } catch (e) {
-    $("status").textContent = "● Locked";
+    $("status").textContent = "● Offline";
   }
 }
 refresh();
-setInterval(() => { if (token) refreshReminders().catch(() => {}); }, 15000);
+setInterval(() => { refreshReminders().catch(() => {}); }, 15000);
 
 let deferredPrompt = null;
 window.addEventListener("beforeinstallprompt", e => {
@@ -1361,8 +1402,8 @@ async function updateOverview() {
     $("backendState").textContent = "Online";
     $("aiState").textContent = h.ai_configured ? (h.ai_provider + " configured") : "Not configured";
     $("aiSummary").textContent = h.ai_configured ? "On" : "Off";
-    if (!token) return;
-    const headers = { "X-Jarvis-Token": token };
+    const headers = {};
+    if (token) headers["X-Jarvis-Token"] = token;
     const [a, b] = await Promise.all([fetch("/api/tasks", { headers }), fetch("/api/reminders", { headers })]);
     if (a.ok) $("taskCount").textContent = (await a.json()).filter(x => !x.done).length;
     if (b.ok) $("reminderCount").textContent = (await b.json()).filter(x => !x.fired).length;
