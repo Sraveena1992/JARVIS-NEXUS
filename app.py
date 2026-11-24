@@ -1,4 +1,4 @@
-"""JARVIS NEXUS Global: Fast Voice, Polished Punjabi, Detailed Docs, Cloud & Google Workspace Ready."""
+"""JARVIS NEXUS Global: Fast Voice, Polished Punjabi, Full Contacts Sync, Cloud & Google Workspace Ready."""
 import ast
 import asyncio
 import hmac
@@ -199,21 +199,19 @@ def normalize_punjabi_speech(text: str) -> str:
     if not s:
         return s
     s = re.sub(r"\s+([।?!,.:;])", r"\1", s)
+    s = s.replace("।", ". ")
     return re.sub(r"\s+", " ", s).strip()
 
 
 SYSTEM = (
-    "You are JARVIS NEXUS, a natural, warm, fast and concise conversational assistant. "
-    "Speak like a helpful human assistant in everyday bolchal (conversational speech), avoiding stiff or overly literary words. "
-    "Strictly obey the requested [CONVERSATION LANGUAGE] and script. Never switch languages or scripts unexpectedly. "
-    "Avoid introductions such as Hello I am JARVIS unless asked. Do not use markdown headings, "
-    "asterisks, bullets, or tables in voice-style answers. Never output tags or brackets like [[SPEAK:...]]. "
-    "Always finish your sentence cleanly without cutting off mid-thought. "
-    "Never claim you are placing, connecting, or dialing a real phone call unless an actual calling action succeeded; "
-    "if asked to call someone, clearly say direct calling is not supported here and offer to look up their contact instead. "
-    "Use a consistent warm feminine JARVIS persona: in Hindi say kar sakti hoon, karungi, samajh gayi; "
+    "You are JARVIS NEXUS, a fast, natural, warm human-like voice assistant. "
+    "Use everyday conversational bolchal. Never use stiff, translated, or bookish phrasing. "
+    "Strictly follow [CONVERSATION LANGUAGE] and script. Never mix Hindi or English into Punjabi Gurmukhi replies. "
+    "Never use markdown, bullets, asterisks, emojis, or tags like [[SPEAK:...]] in replies. "
+    "Always finish your sentence cleanly. "
+    "Warm feminine persona: in Hindi say kar sakti hoon, karungi, samajh gayi; "
     "in Punjabi say ਕਰ ਸਕਦੀ ਹਾਂ, ਕਰਾਂਗੀ, ਸਮਝ ਗਈ. "
-    "Keep replies clear, complete, natural, and fast."
+    "Keep voice replies short (1 crisp sentence) for instant speech."
 )
 
 
@@ -235,7 +233,7 @@ def clean_reply_text(raw_reply: str, language: str = "auto") -> str:
     return cleaned
 
 
-def call_llm(system_prompt: str, user_prompt: str, max_tokens: int = 250, temperature: float = 0.25, timeout: int = 10) -> str:
+def call_llm(system_prompt: str, user_prompt: str, max_tokens: int = 160, temperature: float = 0.15, timeout: int = 8) -> str:
     provider = ai_provider()
     if provider == "none":
         raise HTTPException(503, "AI is not configured. Set GEMINI_API_KEY or OPENAI_API_KEY on the server.")
@@ -310,10 +308,10 @@ def ai_reply(message, voice_mode=False, language="auto"):
         "ta-IN": "Tamil",
         "te-IN": "Telugu",
         "pa-IN": (
-            "warm, natural everyday bolchal Punjabi written STRICTLY in Gurmukhi script "
-            "(use simple, natural Punjabi bolchal like ਮੈਂ ਤੁਹਾਡੀ ਮਦਦ ਕਰ ਸਕਦੀ ਹਾਂ, ਦੱਸੋ ਕਿੱਦਾਂ ਮਦਦ ਕਰਾਂ, ਕੋਈ ਗੱਲ ਨਹੀਂ, ਠੀਕ ਹੈ; "
-            "avoid stiff bookish words or broken syllables; never mix Hindi or English in the main reply; "
-            "always complete the sentence cleanly)"
+            "simple, warm, everyday spoken Punjabi STRICTLY in Gurmukhi script "
+            "(examples: ਹਾਂਜੀ, ਮੈਂ ਤੁਹਾਨੂੰ ਸਾਫ਼ ਸੁਣ ਰਹੀ ਹਾਂ। ਦੱਸੋ ਮੈਂ ਤੁਹਾਡੀ ਕੀ ਮਦਦ ਕਰ ਸਕਦੀ ਹਾਂ?, "
+            "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ਜੀ, ਦੱਸੋ ਕਿੱਦਾਂ ਮਦਦ ਕਰਾਂ?, ਠੀਕ ਹੈ ਜੀ, ਸਮਝ ਗਈ। "
+            "Never use Hindi words like सुन पा रही, मदद कर सकती, or English words; keep sentences short and natural)"
         ),
         "pa-Latn-IN": "natural everyday bolchal Punjabi written ONLY in Roman (Latin) script, with authentic Punjabi words",
         "ur-PK": "Urdu",
@@ -323,15 +321,14 @@ def ai_reply(message, voice_mode=False, language="auto"):
         message
         + "\n\n[CONVERSATION LANGUAGE: Respond ONLY in "
         + selected
-        + ". Never switch to Hindi or English if Punjabi is selected.]"
+        + ". Never switch languages.]"
     )
     if voice_mode:
         prompt_text += (
-            "\n[VOICE RESPONSE: Reply in plain text with no Markdown or tags. "
-            "Keep it to 1 complete, warm, natural spoken sentence that never cuts off.]"
+            "\n[VOICE RESPONSE: 1 short, complete, natural spoken sentence (max 18 words). Plain text only.]"
         )
-    max_tokens = 120 if voice_mode else 360
-    answer = call_llm(SYSTEM, prompt_text, max_tokens=max_tokens, temperature=0.2, timeout=10)
+    max_tokens = 85 if voice_mode else 280
+    answer = call_llm(SYSTEM, prompt_text, max_tokens=max_tokens, temperature=0.15, timeout=8)
     cleaned = clean_reply_text(answer, language)
     speak_str = normalize_punjabi_speech(cleaned) if language == "pa-IN" else cleaned
     return cleaned, speak_str
@@ -352,7 +349,7 @@ TTS_VOICES = {
 
 @app.post("/api/tts", dependencies=[Depends(auth)])
 async def tts(req: SpeechRequest):
-    throttle("tts:" + TOKEN[:12], 50, 60)
+    throttle("tts:" + TOKEN[:12], 60, 60)
     try:
         import edge_tts
     except ImportError as exc:
@@ -363,11 +360,11 @@ async def tts(req: SpeechRequest):
         if req.language == "pa-IN":
             selected = TTS_VOICES["hi-IN"]
             fallback = True
-            rate = "-4%"
+            rate = "+2%"
             spoken_input = normalize_punjabi_speech(spoken_input)
         else:
             selected = TTS_VOICES[req.language]
-            rate = "+8%" if req.language.startswith("en") else "+4%"
+            rate = "+10%" if req.language.startswith("en") else "+8%"
 
         async def synthesize():
             data = bytearray()
@@ -378,7 +375,7 @@ async def tts(req: SpeechRequest):
                         raise ValueError("Audio exceeds size limit")
             return bytes(data)
 
-        data = await asyncio.wait_for(synthesize(), timeout=6)
+        data = await asyncio.wait_for(synthesize(), timeout=5)
         if len(data) < 600:
             raise ValueError("Incomplete or empty audio received")
         if not (data.startswith(b"ID3") or (len(data) > 1 and data[0] == 255 and (data[1] & 224) == 224)):
@@ -602,6 +599,7 @@ def google_auth_url(request: Request):
         "https://www.googleapis.com/auth/gmail.readonly",
         "https://www.googleapis.com/auth/gmail.send",
         "https://www.googleapis.com/auth/contacts.readonly",
+        "https://www.googleapis.com/auth/contacts.other.readonly",
     ])
     params = urllib.parse.urlencode({
         "client_id": cid,
@@ -642,25 +640,82 @@ def google_callback(request: Request, code: str = "", state: str = ""):
         raise HTTPException(502, "Failed to exchange Google OAuth code") from exc
 
 
+def _extract_people(connections, ql=""):
+    items = []
+    for person in connections:
+        name = (person.get("names") or [{}])[0].get("displayName", "")
+        email = (person.get("emailAddresses") or [{}])[0].get("value", "")
+        phone = (person.get("phoneNumbers") or [{}])[0].get("value", "")
+        if ql and ql not in (name + " " + email + " " + phone).lower():
+            continue
+        if name or email or phone:
+            items.append({"name": name or email or phone, "email": email, "phone": phone})
+    return items
+
+
 @app.get("/api/google/contacts", dependencies=[Depends(auth)])
-def google_contacts(request: Request, q: str = ""):
+def google_contacts(request: Request, q: str = "", limit: int = 2500):
     tok = google_access_token(request)
-    url = "https://people.googleapis.com/v1/people/me/connections?personFields=names,emailAddresses,phoneNumbers&pageSize=100"
-    req = urllib.request.Request(url, headers={"Authorization": "Bearer " + tok})
+    safe_limit = max(1, min(int(limit or 2500), 5000))
+    ql = q.strip().lower()
+    out = []
+    seen_keys = set()
+
+    def add_unique(batch):
+        for c in batch:
+            key = (c["name"].lower(), c["email"].lower(), re.sub(r"\D+", "", c["phone"]))
+            if key not in seen_keys:
+                seen_keys.add(key)
+                out.append(c)
+                if len(out) >= safe_limit:
+                    return True
+        return False
+
     try:
-        with urllib.request.urlopen(req, timeout=12) as resp:
-            data = json.load(resp)
-        out = []
-        ql = q.strip().lower()
-        for person in data.get("connections", []):
-            name = (person.get("names") or [{}])[0].get("displayName", "")
-            email = (person.get("emailAddresses") or [{}])[0].get("value", "")
-            phone = (person.get("phoneNumbers") or [{}])[0].get("value", "")
-            if ql and ql not in (name + " " + email + " " + phone).lower():
-                continue
-            if name or email or phone:
-                out.append({"name": name or email or phone, "email": email, "phone": phone})
-        return {"contacts": out[:30]}
+        # 1. Fetch all saved Google Contacts via pagination
+        page_token = ""
+        for _ in range(25):
+            params = {
+                "personFields": "names,emailAddresses,phoneNumbers",
+                "pageSize": 500,
+                "sortOrder": "FIRST_NAME_ASCENDING",
+            }
+            if page_token:
+                params["pageToken"] = page_token
+            url = "https://people.googleapis.com/v1/people/me/connections?" + urllib.parse.urlencode(params)
+            req = urllib.request.Request(url, headers={"Authorization": "Bearer " + tok})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.load(resp)
+            if add_unique(_extract_people(data.get("connections", []), ql)):
+                break
+            page_token = data.get("nextPageToken", "")
+            if not page_token:
+                break
+
+        # 2. Also include Gmail "Other Contacts" (auto-saved email recipients) if scope granted
+        if len(out) < safe_limit:
+            other_token = ""
+            for _ in range(10):
+                oparams = {
+                    "readMask": "names,emailAddresses,phoneNumbers",
+                    "pageSize": 500,
+                }
+                if other_token:
+                    oparams["pageToken"] = other_token
+                ourl = "https://people.googleapis.com/v1/otherContacts?" + urllib.parse.urlencode(oparams)
+                oreq = urllib.request.Request(ourl, headers={"Authorization": "Bearer " + tok})
+                try:
+                    with urllib.request.urlopen(oreq, timeout=12) as oresp:
+                        odata = json.load(oresp)
+                    if add_unique(_extract_people(odata.get("otherContacts", []), ql)):
+                        break
+                    other_token = odata.get("nextPageToken", "")
+                    if not other_token:
+                        break
+                except Exception:
+                    break
+
+        return {"contacts": out, "total": len(out)}
     except Exception as exc:
         raise HTTPException(502, "Could not fetch Google Contacts") from exc
 
@@ -724,7 +779,7 @@ def health():
     return {
         "ok": True,
         "service": "jarvis-nexus-global",
-        "version": "1.14.0",
+        "version": "4.8.0",
         "ai_configured": provider != "none",
         "ai_provider": provider,
         "token_configured": len(TOKEN) >= 32,
@@ -776,7 +831,7 @@ def history():
 
 @app.post("/api/chat", dependencies=[Depends(auth)])
 def chat(q: Chat):
-    throttle("chat:" + TOKEN[:12], 30, 60)
+    throttle("chat:" + TOKEN[:12], 40, 60)
     msg = q.message.strip()
     if not msg:
         raise HTTPException(400, "Empty message")
